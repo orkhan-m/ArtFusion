@@ -6,7 +6,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "./consts";
+import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 
 interface Card {

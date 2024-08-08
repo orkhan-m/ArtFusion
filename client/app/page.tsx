@@ -1,7 +1,7 @@
 "use client";
 import { useLogout, useSignerStatus, useUser } from "@account-kit/react";
-import { Login } from "./Login";
-import { Game } from "./Game";
+import { Login } from "./components/Login";
+import { Game } from "./components/Game";
 
 export default function Home() {
   const user = useUser();
