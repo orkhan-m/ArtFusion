@@ -1,0 +1,7 @@
+
+POST http://localhost:4000/chat-gpt/ask HTTP/1.1
+content-type: application/json
+
+{
+  "prompt": "Hello, how are you?"
+}
