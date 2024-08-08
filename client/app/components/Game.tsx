@@ -8,29 +8,18 @@ import {
 } from "@hello-pangea/dnd";
 import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
-
-interface Card {
-  id: string;
-  content: string;
-}
-
-const initialCards = [
-  { id: "card-1", content: "Card 1" },
-  { id: "card-2", content: "Card 2" },
-  { id: "card-3", content: "Card 3" },
-];
+import { NFT } from "../models";
 
 export const Game: React.FC = () => {
   console.log("rendered");
-  const [cards, setCards] = useState<Card[]>(initialCards);
-  const [droppedCards, setDroppedCards] = useState<Card[]>([]);
+  const [nfts, setNfts] = useState<NFT[]>([]);
+  const [droppedCards, setDroppedCards] = useState<NFT[]>([]);
   // const user = useUser();
 
   const [wallet, setWalletAddress] = useState<string>(DEFAULT_ETH_ADDRESS);
   const [collection, setCollectionAddress] = useState<string>(
     DEFAULT_CONTRACT_ADDRESS
   );
-  const [NFTs, setNFTs] = useState<any>([]);
 
   const handleDragEnd = (result: DropResult) => {
     console.log(result);
@@ -40,9 +29,9 @@ export const Game: React.FC = () => {
       result.source.droppableId === "cards" &&
       result.destination.droppableId === "dropArea"
     ) {
-      const newCards = Array.from(cards);
+      const newCards = Array.from(nfts);
       const [removed] = newCards.splice(result.source.index, 1);
-      setCards(newCards);
+      setNfts(newCards);
 
       const newDroppedCards = Array.from(droppedCards);
       newDroppedCards.splice(result.destination.index, 0, removed);
@@ -55,9 +44,9 @@ export const Game: React.FC = () => {
       const [removed] = newDroppedCards.splice(result.source.index, 1);
       setDroppedCards(newDroppedCards);
 
-      const newCards = Array.from(cards);
+      const newCards = Array.from(nfts);
       newCards.splice(result.destination.index, 0, removed);
-      setCards(newCards);
+      setNfts(newCards);
     } else if (
       result.source.droppableId === "dropArea" &&
       result.destination.droppableId === "dropArea"
@@ -70,10 +59,10 @@ export const Game: React.FC = () => {
       result.source.droppableId === "cards" &&
       result.destination.droppableId === "cards"
     ) {
-      const newCards = Array.from(cards);
+      const newCards = Array.from(nfts);
       const [removed] = newCards.splice(result.source.index, 1);
       newCards.splice(result.destination.index, 0, removed);
-      setCards(newCards);
+      setNfts(newCards);
     }
   };
 
@@ -89,16 +78,25 @@ export const Game: React.FC = () => {
     if (!collection.length) {
       const fetchURL = `${baseURL}?owner=${wallet}`;
 
-      nfts = await fetch(fetchURL, requestOptions).then((data) => data.json());
+      try {
+        nfts = await fetch(fetchURL, requestOptions).then((data) =>
+          data.json()
+        );
+      } catch {}
     } else {
       console.log("fetching nfts for collection owned by address");
       const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
-      nfts = await fetch(fetchURL, requestOptions).then((data) => data.json());
+      try {
+        nfts = await fetch(fetchURL, requestOptions).then((data) =>
+          data.json()
+        );
+        console.log(nfts);
+      } catch {}
     }
 
     if (nfts) {
       console.log("nfts:", nfts);
-      setNFTs(nfts.ownedNfts);
+      setNfts(nfts.ownedNfts as NFT[]);
     }
   };
 
@@ -112,34 +110,19 @@ export const Game: React.FC = () => {
   //   }
   // }, [user?.address]);
 
+  console.log(nfts);
+
   return (
     <div>
       <div className="address-wrapper">
-        <div className="form-group">
+        <div>
           <label>Your wallet address:</label>
-          <input
-            type="text"
-            value={wallet}
-            readOnly
-            className="form-control"
-          ></input>
+          <input type="text" value={wallet} readOnly></input>
         </div>
-        <div className="form-group">
+        <div>
           <label>Collection address:</label>
-          <input
-            type="text"
-            value={collection}
-            readOnly
-            className="form-control"
-          ></input>
+          <input type="text" value={collection} readOnly></input>
         </div>
-      </div>
-
-      <div className="flex flex-wrap gap-y-12 mt-4 w-5/6 gap-x-2 justify-center">
-        {NFTs.length &&
-          NFTs.map((nft: any) => {
-            return <NFTCard key={nft.id.tokenId} nft={nft}></NFTCard>;
-          })}
       </div>
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="App">
@@ -151,8 +134,12 @@ export const Game: React.FC = () => {
                 {...provided.droppableProps}
                 className="card-list"
               >
-                {cards.map((card, index) => (
-                  <Draggable key={card.id} draggableId={card.id} index={index}>
+                {nfts.map((nft, index) => (
+                  <Draggable
+                    key={nft.id.tokenId}
+                    draggableId={nft.id.tokenId}
+                    index={index}
+                  >
                     {(provided) => (
                       <div
                         ref={provided.innerRef}
@@ -160,7 +147,7 @@ export const Game: React.FC = () => {
                         {...provided.dragHandleProps}
                         className="card"
                       >
-                        {card.content}
+                        <NFTCard nft={nft}></NFTCard>
                       </div>
                     )}
                   </Draggable>
@@ -178,8 +165,12 @@ export const Game: React.FC = () => {
                 {...provided.droppableProps}
                 className="drop-area"
               >
-                {droppedCards.map((card, index) => (
-                  <Draggable key={card.id} draggableId={card.id} index={index}>
+                {droppedCards.map((nft, index) => (
+                  <Draggable
+                    key={nft.id.tokenId}
+                    draggableId={nft.id.tokenId}
+                    index={index}
+                  >
                     {(provided) => (
                       <div
                         ref={provided.innerRef}
@@ -187,7 +178,7 @@ export const Game: React.FC = () => {
                         {...provided.dragHandleProps}
                         className="card"
                       >
-                        {card.content}
+                        <NFTCard nft={nft}></NFTCard>
                       </div>
                     )}
                   </Draggable>
