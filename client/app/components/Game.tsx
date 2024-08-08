@@ -20,7 +20,6 @@ export const Game: React.FC = () => {
   const [collection, setCollectionAddress] = useState<string>("");
 
   const handleDragEnd = (result: DropResult) => {
-    console.log(result);
     if (!result.destination) return;
 
     if (
@@ -72,7 +71,6 @@ export const Game: React.FC = () => {
       method: "GET",
     };
 
-    console.log("fetching nfts for collection owned by address");
     const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
     try {
       nfts = await fetch(fetchURL, requestOptions)
@@ -95,8 +93,6 @@ export const Game: React.FC = () => {
       fetchNFTs();
     }
   }, [wallet, collection]);
-
-  console.log(nfts);
 
   return (
     <div>
