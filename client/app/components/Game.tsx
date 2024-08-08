@@ -9,17 +9,15 @@ import {
 import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
+import { useUser } from "@account-kit/react";
 
 export const Game: React.FC = () => {
-  console.log("rendered");
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [droppedCards, setDroppedCards] = useState<NFT[]>([]);
-  // const user = useUser();
+  const user = useUser();
 
-  const [wallet, setWalletAddress] = useState<string>(DEFAULT_ETH_ADDRESS);
-  const [collection, setCollectionAddress] = useState<string>(
-    DEFAULT_CONTRACT_ADDRESS
-  );
+  const [wallet, setWalletAddress] = useState<string>("");
+  const [collection, setCollectionAddress] = useState<string>("");
 
   const handleDragEnd = (result: DropResult) => {
     console.log(result);
@@ -67,48 +65,36 @@ export const Game: React.FC = () => {
   };
 
   const fetchNFTs = async () => {
-    let nfts;
-    console.log("fetching nfts");
+    let nfts: NFT[] = [];
     const api_key = "tFRus-ejJq6yuZyv0jLCrrn2y5eCLsyK";
     const baseURL = `https://eth-mainnet.g.alchemy.com/v2/${api_key}/getNFTs/`;
     var requestOptions = {
       method: "GET",
     };
 
-    if (!collection.length) {
-      const fetchURL = `${baseURL}?owner=${wallet}`;
-
-      try {
-        nfts = await fetch(fetchURL, requestOptions).then((data) =>
-          data.json()
-        );
-      } catch {}
-    } else {
-      console.log("fetching nfts for collection owned by address");
-      const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
-      try {
-        nfts = await fetch(fetchURL, requestOptions).then((data) =>
-          data.json()
-        );
-        console.log(nfts);
-      } catch {}
-    }
+    console.log("fetching nfts for collection owned by address");
+    const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
+    try {
+      nfts = await fetch(fetchURL, requestOptions)
+        .then((data) => data.json())
+        .then((data) => data.ownedNfts);
+    } catch {}
 
     if (nfts) {
-      console.log("nfts:", nfts);
-      setNfts(nfts.ownedNfts as NFT[]);
+      setNfts(nfts as NFT[]);
     }
   };
 
   useEffect(() => {
-    fetchNFTs();
-  }, []);
+    setWalletAddress(DEFAULT_ETH_ADDRESS);
+    setCollectionAddress(DEFAULT_CONTRACT_ADDRESS);
+  }, [user?.address]);
 
-  // useEffect(() => {
-  //   if (user?.address) {
-  //     setWalletAddress(user?.address);
-  //   }
-  // }, [user?.address]);
+  useEffect(() => {
+    if (wallet && collection) {
+      fetchNFTs();
+    }
+  }, [wallet, collection]);
 
   console.log(nfts);
 
@@ -116,79 +102,93 @@ export const Game: React.FC = () => {
     <div>
       <div className="address-wrapper">
         <div>
-          <label>Your wallet address:</label>
-          <input type="text" value={wallet} readOnly></input>
+          <label className="form-label">Your wallet address:</label>
+          <input
+            type="text"
+            value={wallet}
+            readOnly
+            className="form-control"
+          ></input>
         </div>
         <div>
-          <label>Collection address:</label>
-          <input type="text" value={collection} readOnly></input>
+          <label className="form-label">Collection address:</label>
+          <input
+            type="text"
+            value={collection}
+            readOnly
+            className="form-control"
+          ></input>
         </div>
       </div>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="App">
-          <h2>Available Cards</h2>
-          <Droppable droppableId="cards" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="card-list"
-              >
-                {nfts.map((nft, index) => (
-                  <Draggable
-                    key={nft.id.tokenId}
-                    draggableId={nft.id.tokenId}
-                    index={index}
+      <div className="mt-4">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="dnd-wrapper">
+            <div className="dnd-item">
+              <h5>Your Collection</h5>
+              <Droppable droppableId="cards" direction="horizontal">
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="card-list"
                   >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="card"
+                    {nfts.map((nft, index) => (
+                      <Draggable
+                        key={nft.id.tokenId}
+                        draggableId={nft.id.tokenId}
+                        index={index}
                       >
-                        <NFTCard nft={nft}></NFTCard>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
+                            <NFTCard nft={nft}></NFTCard>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
 
-          <h2>Drop Area</h2>
-          <Droppable droppableId="dropArea" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="drop-area"
-              >
-                {droppedCards.map((nft, index) => (
-                  <Draggable
-                    key={nft.id.tokenId}
-                    draggableId={nft.id.tokenId}
-                    index={index}
+            <div className="dnd-item">
+              <h5>Mixer area (drop here your nfts to combine them)</h5>
+              <Droppable droppableId="dropArea" direction="horizontal">
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="drop-area"
                   >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="card"
+                    {droppedCards.map((nft, index) => (
+                      <Draggable
+                        key={nft.id.tokenId}
+                        draggableId={nft.id.tokenId}
+                        index={index}
                       >
-                        <NFTCard nft={nft}></NFTCard>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </div>
-      </DragDropContext>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
+                            <NFTCard nft={nft}></NFTCard>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          </div>
+        </DragDropContext>
+      </div>
     </div>
   );
 };

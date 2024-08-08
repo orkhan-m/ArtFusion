@@ -19,27 +19,51 @@
   gap: 12px;
 }
 
+.dnd-wrapper {
+  display: flex;
+  gap:20px;
+}
+
+.dnd-item {
+  width: 650px;
+}
+
 .card-list, .drop-area {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 270px;
+  width: 100%;
   padding: 10px;
   border: 2px solid #ddd;
   border-radius: 5px;
-  min-height: 100px;
-  min-width: 600px;
-  margin: 10px 0;
-}
-
-.card {
-  padding: 10px;
-  margin: 0 10px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .nft-card {
   width: 200px;
+  height: 250px;
+  border: 1px solid black;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+.nft-card-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.nft-card-title {
+  font-size: 14px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.nft-card-description {
+  font-size: 12px;
 }
 
 .address-input {

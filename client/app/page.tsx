@@ -8,6 +8,7 @@ export default function Home() {
 
   const signerStatus = useSignerStatus();
   const { logout } = useLogout();
+  console.log(user);
 
   return (
     <main>
