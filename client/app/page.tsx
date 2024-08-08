@@ -6,6 +6,7 @@ import {
   useUser,
 } from "@account-kit/react";
 import { main } from "./test";
+import Game from "./game";
 
 export default function Home() {
   const user = useUser();
@@ -21,12 +22,15 @@ export default function Home() {
         <>Loading...</>
       ) : user ? (
         <div className="flex flex-col gap-2 p-2">
-          <p className="text-xl font-bold">Success!</p>
+          {/* <p className="text-xl font-bold">Success!</p>
           <div>You are logged in as {user.email ?? "anon"}.</div>
-          <button className="btn btn-primary mt-6" onClick={() => main()}>Get token info</button>
+          <button className="btn btn-primary mt-6" onClick={() => main()}>
+            Get token info
+          </button>
           <button className="btn btn-primary mt-6" onClick={() => logout()}>
             Log out
-          </button>
+          </button> */}
+          <Game />
         </div>
       ) : (
         <button className="btn btn-primary" onClick={openAuthModal}>
