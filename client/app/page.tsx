@@ -2,6 +2,10 @@
 import { useLogout, useSignerStatus, useUser } from "@account-kit/react";
 import { Login } from "./components/Login";
 import { Game } from "./components/Game";
+import Modal from "react-modal";
+
+// Make sure to bind modal to your appElement (https://reactcommunity.org/react-modal/accessibility/)
+Modal.setAppElement("#main");
 
 export default function Home() {
   const user = useUser();
@@ -10,7 +14,7 @@ export default function Home() {
   const { logout } = useLogout();
 
   return (
-    <main>
+    <main id="main">
       {signerStatus.isInitializing ? (
         <>Loading...</>
       ) : user ? (

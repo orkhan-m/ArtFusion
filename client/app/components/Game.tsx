@@ -11,6 +11,7 @@ import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
 import { ImageUpload } from "./ImageUpload";
+import { CreateNFTModal } from "./CreateNFTModal";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -19,6 +20,7 @@ export const Game: React.FC = () => {
 
   const [wallet, setWalletAddress] = useState<string>("");
   const [collection, setCollectionAddress] = useState<string>("");
+  const [isCreateNFTModalOpen, setIsCreateNFTModalOpen] = useState(false);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -95,6 +97,14 @@ export const Game: React.FC = () => {
     }
   }, [wallet, collection]);
 
+  const openModal = () => {
+    setIsCreateNFTModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsCreateNFTModalOpen(false);
+  };
+
   return (
     <div>
       <div className="address-wrapper">
@@ -113,7 +123,11 @@ export const Game: React.FC = () => {
             <div className="dnd-item">
               <div className="dnd-item-header">
                 <h5>Your Collection</h5>
-                <button type="button" className="btn btn-primary">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={openModal}
+                >
                   Create new NFT
                 </button>
               </div>
@@ -191,6 +205,7 @@ export const Game: React.FC = () => {
       <div>
         <ImageUpload />
       </div>
+      <CreateNFTModal isOpen={isCreateNFTModalOpen} onClose={closeModal} />
     </div>
   );
 };

@@ -82,20 +82,36 @@
   width: 100%;
 }
 
-
-
-.image-upload-wrapper {
-  font-family: sans-serif;
-  /* text-align: center; */
-  background-color: #f6f9fe;
-  height: 100vh;
-}
 .image-item {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   margin: 10px 0;
 }
+
+.image-item-photo {
+  width: 250px;
+}
+
 .image-item__btn-wrapper {
   display: flex;
   flex-direction: column;
   margin-left: 10px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: end;
+}
+
+.modal-body {
+  width: 500px;
+  height: 400px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20px;
+  justify-content: end;
 }

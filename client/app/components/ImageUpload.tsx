@@ -5,7 +5,7 @@ import ImageUploading from "react-images-uploading";
 
 export const ImageUpload: React.FC = () => {
   const [images, setImages] = useState([]);
-  const maxNumber = 69;
+  const maxNumber = 1;
   const onChange = (imageList: any, addUpdateIndex: any) => {
     // data for submit
     console.log(imageList, addUpdateIndex);
@@ -13,7 +13,7 @@ export const ImageUpload: React.FC = () => {
   };
 
   return (
-    <div className="image-upload-wrapper">
+    <div className="image-upload-wrapper mt-3">
       <ImageUploading
         multiple
         value={images}
@@ -22,27 +22,22 @@ export const ImageUpload: React.FC = () => {
         dataURLKey="data_url"
         acceptType={["jpg"]}
       >
-        {({
-          imageList,
-          onImageUpload,
-          onImageRemoveAll,
-          onImageUpdate,
-          onImageRemove,
-          isDragging,
-          dragProps,
-        }) => (
+        {({ imageList, onImageUpload, onImageRemove, dragProps }) => (
           // write your building UI
           <div className="upload__image-wrapper">
-            <button onClick={onImageUpload} {...dragProps}>
-              Click or Drop here
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={onImageUpload}
+              {...dragProps}
+              disabled={!!images.length}
+            >
+              Click for file upload
             </button>
-            &nbsp;
-            <button onClick={onImageRemoveAll}>Remove all images</button>
             {imageList.map((image, index) => (
               <div key={index} className="image-item">
-                <img src={image.data_url} alt="" width="100" />
+                <img src={image.data_url} alt="" className="image-item-photo" />
                 <div className="image-item__btn-wrapper">
-                  <button onClick={() => onImageUpdate(index)}>Update</button>
                   <button onClick={() => onImageRemove(index)}>Remove</button>
                 </div>
               </div>
