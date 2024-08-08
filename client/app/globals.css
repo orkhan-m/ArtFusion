@@ -6,7 +6,7 @@
   display: flex;
   justify-content: end;
   align-items: center;
-  padding: 16px;
+  padding: 16px 0;
 }
 
 .wrapper {
@@ -21,11 +21,19 @@
 
 .dnd-wrapper {
   display: flex;
+  justify-content: space-between;
   gap:20px;
 }
 
 .dnd-item {
   width: 650px;
+}
+
+.dnd-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
 }
 
 .card-list, .drop-area {
@@ -72,4 +80,22 @@
 
 .collection-input {
   width: 100%;
+}
+
+
+
+.image-upload-wrapper {
+  font-family: sans-serif;
+  /* text-align: center; */
+  background-color: #f6f9fe;
+  height: 100vh;
+}
+.image-item {
+  display: flex;
+  margin: 10px 0;
+}
+.image-item__btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
 }

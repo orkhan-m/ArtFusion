@@ -10,6 +10,7 @@ import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
+import { ImageUpload } from "./ImageUpload";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -98,29 +99,25 @@ export const Game: React.FC = () => {
     <div>
       <div className="address-wrapper">
         <div>
-          <label className="form-label">Your wallet address:</label>
-          <input
-            type="text"
-            value={wallet}
-            readOnly
-            className="form-control"
-          ></input>
+          <label>Your wallet address:</label>
+          <input type="text" value={wallet} readOnly></input>
         </div>
         <div>
-          <label className="form-label">Collection address:</label>
-          <input
-            type="text"
-            value={collection}
-            readOnly
-            className="form-control"
-          ></input>
+          <label>Collection address:</label>
+          <input type="text" value={collection} readOnly></input>
         </div>
       </div>
       <div className="mt-4">
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="dnd-wrapper">
             <div className="dnd-item">
-              <h5>Your Collection</h5>
+              <div className="dnd-item-header">
+                <h5>Your Collection</h5>
+                <button type="button" className="btn btn-primary">
+                  Create new NFT
+                </button>
+              </div>
+
               <Droppable droppableId="cards" direction="horizontal">
                 {(provided) => (
                   <div
@@ -152,7 +149,13 @@ export const Game: React.FC = () => {
             </div>
 
             <div className="dnd-item">
-              <h5>Mixer area (drop here your nfts to combine them)</h5>
+              <div className="dnd-item-header">
+                <h5>Mixer area (drop here your nfts to combine them)</h5>
+                <button type="button" className="btn btn-primary">
+                  Shake them!
+                </button>
+              </div>
+
               <Droppable droppableId="dropArea" direction="horizontal">
                 {(provided) => (
                   <div
@@ -184,6 +187,9 @@ export const Game: React.FC = () => {
             </div>
           </div>
         </DragDropContext>
+      </div>
+      <div>
+        <ImageUpload />
       </div>
     </div>
   );
