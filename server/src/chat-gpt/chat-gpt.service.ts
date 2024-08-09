@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NFTBaseData } from '../../../common';
 import axios from 'axios';
 import OpenAI from 'openai';
 
@@ -35,15 +36,6 @@ export class ChatGptService {
     }
   }
 
-  async testRequest() {
-    const completion = await openai.chat.completions.create({
-      messages: [{ role: 'system', content: 'You are a helpful assistant.' }],
-      model: 'gpt-4o-mini',
-    });
-
-    return completion;
-  }
-
   async analyzeImage(image: string) {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -63,5 +55,23 @@ export class ChatGptService {
       ],
     });
     return response;
+  }
+
+  async generateImage(data: NFTBaseData[]) {
+    const response = await openai.images.generate({
+      model: 'dall-e-2',
+      prompt: this.combineNFTsTextsToPrompt(data),
+      n: 1,
+      size: '256x256',
+    });
+    return response;
+  }
+
+  private combineNFTsTextsToPrompt(nftArray: NFTBaseData[]): string {
+    const formattedNFTs = nftArray.map((nft, index) => {
+      return `${index + 1}. Name: ${nft.name}. Description: ${nft.description}`;
+    });
+    const combination = formattedNFTs.join(' ');
+    return `Please generate a unique image that combines the following items. Provide a new name and a brief description (maximum 200 characters) for the generated image. Here is the input data: ${combination}.`;
   }
 }
