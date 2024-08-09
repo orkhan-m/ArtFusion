@@ -10,7 +10,6 @@ import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
-import { ImageUpload } from "./ImageUpload";
 import { CreateNFTModal } from "./CreateNFTModal";
 
 export const Game: React.FC = () => {
@@ -201,9 +200,6 @@ export const Game: React.FC = () => {
             </div>
           </div>
         </DragDropContext>
-      </div>
-      <div>
-        <ImageUpload />
       </div>
       <CreateNFTModal isOpen={isCreateNFTModalOpen} onClose={closeModal} />
     </div>
