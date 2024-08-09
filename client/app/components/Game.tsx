@@ -11,6 +11,9 @@ import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
 import { CreateNFTModal } from "./CreateNFTModal";
+import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosResponse } from "axios";
+import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -104,6 +107,32 @@ export const Game: React.FC = () => {
     setIsCreateNFTModalOpen(false);
   };
 
+  const sendNFTData = async () => {
+    const data: NFTBaseData[] = droppedCards.map((i) => ({
+      name: i.title,
+      description: i.description,
+    }));
+    return axios
+      .post<
+        NFTBaseData[],
+        AxiosResponse<any>
+      >("http://localhost:4000/chat-gpt/generateImage", GENERATE_IMAGE_MOCK_INPUT)
+      .then((response) => response.data);
+  };
+
+  const {
+    isPending: isGenerateImageLoading,
+    mutate: generateImage,
+    data: generateImageData,
+  } = useMutation({
+    mutationFn: () => {
+      return sendNFTData();
+    },
+    onSuccess: (data) => {
+      console.log(data);
+    },
+  });
+
   return (
     <div>
       <div className="address-wrapper">
@@ -164,7 +193,13 @@ export const Game: React.FC = () => {
             <div className="dnd-item">
               <div className="dnd-item-header">
                 <h5>Mixer area (drop here your nfts to combine them)</h5>
-                <button type="button" className="btn btn-primary">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    generateImage();
+                  }}
+                >
                   Shake them!
                 </button>
               </div>
