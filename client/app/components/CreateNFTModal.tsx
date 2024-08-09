@@ -2,7 +2,9 @@ import Modal from "react-modal";
 import ImageUploading, { ImageType } from "react-images-uploading";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
+import TypingEffect from "../utils";
+import { ChatCompletion } from "../models";
 
 const customStyles = {
   content: {
@@ -32,17 +34,28 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
   };
 
   const sendImage = async (file: ImageType) => {
-    return axios.post("http://localhost:4000/chat-gpt/analyzeImage", {
-      data_url: file.data_url,
-    });
+    return axios
+      .post<ImageType, AxiosResponse<ChatCompletion>>(
+        "http://localhost:4000/chat-gpt/analyzeImage",
+        {
+          data_url: file.data_url,
+        }
+      )
+      .then((response) => response.data);
   };
 
-  const { isPending: isAnalyzeImageLoading, mutate: analyzeImage } =
-    useMutation({
-      mutationFn: (file: ImageType) => {
-        return sendImage(file);
-      },
-    });
+  const {
+    isPending: isAnalyzeImageLoading,
+    mutate: analyzeImage,
+    data: chatGptResponse,
+  } = useMutation({
+    mutationFn: (file: ImageType) => {
+      return sendImage(file);
+    },
+    onSuccess: (data) => {
+      console.log(data);
+    },
+  });
 
   return (
     <Modal isOpen={isOpen} style={customStyles}>
@@ -85,6 +98,14 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
               </div>
             )}
           </ImageUploading>
+          {chatGptResponse && (
+            <div className="chat-simulation">
+              <TypingEffect
+                text={chatGptResponse.choices[0].message.content}
+                speed={50}
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="modal-footer">
