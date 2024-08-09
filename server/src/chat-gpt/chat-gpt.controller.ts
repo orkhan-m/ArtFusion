@@ -1,5 +1,14 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { ChatGptService } from './chat-gpt.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 
 @Controller('chat-gpt')
 export class ChatGptController {
@@ -15,8 +24,9 @@ export class ChatGptController {
     return this.chatGptService.testRequest();
   }
 
-  @Get('analyzeImage')
-  async analyzeImage(): Promise<any> {
-    return this.chatGptService.analyzeImage();
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('image'))
+  async analyzeImage(@UploadedFile() file: Express.Multer.File): Promise<any> {
+    return this.chatGptService.analyzeImage(file);
   }
 }

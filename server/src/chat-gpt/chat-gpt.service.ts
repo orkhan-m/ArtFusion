@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import OpenAI from 'openai';
+import { Express } from 'express';
 
 const openai = new OpenAI();
 
@@ -44,7 +45,8 @@ export class ChatGptService {
     return completion;
   }
 
-  async analyzeImage() {
+  async analyzeImage(file: Express.Multer.File) {
+    const base64Image = file.buffer.toString('base64');
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -55,7 +57,7 @@ export class ChatGptService {
             {
               type: 'image_url',
               image_url: {
-                url: 'https://pics.craiyon.com/2023-06-30/76e502c13cf3441ba38b27ab59b5a250.webp',
+                url: base64Image,
               },
             },
           ],
