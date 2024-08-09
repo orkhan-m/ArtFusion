@@ -10,8 +10,3 @@ content-type: application/json
 
 GET http://localhost:4000/chat-gpt/test HTTP/1.1
 content-type: application/json
-
-#####################################################################
-
-GET http://localhost:4000/chat-gpt/analyzeImage HTTP/1.1
-content-type: application/json

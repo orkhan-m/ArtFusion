@@ -1,6 +1,8 @@
 import Modal from "react-modal";
-import ImageUploading from "react-images-uploading";
+import ImageUploading, { ImageType } from "react-images-uploading";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 const customStyles = {
   content: {
@@ -19,17 +21,28 @@ interface IProps {
 }
 
 export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState<ImageType[]>([]);
   const maxNumber = 1;
-  const onChange = (imageList: any, addUpdateIndex: any) => {
-    // data for submit
-    console.log(imageList, addUpdateIndex);
-    setImages(imageList);
+  const onChange = (images: any) => {
+    setImages(images);
   };
 
   const submit = () => {
-    console.log(images);
+    analyzeImage(images[0]);
   };
+
+  const sendImage = async (file: ImageType) => {
+    return axios.post("http://localhost:4000/chat-gpt/analyzeImage", {
+      data_url: file.data_url,
+    });
+  };
+
+  const { isPending: isAnalyzeImageLoading, mutate: analyzeImage } =
+    useMutation({
+      mutationFn: (file: ImageType) => {
+        return sendImage(file);
+      },
+    });
 
   return (
     <Modal isOpen={isOpen} style={customStyles}>
@@ -45,7 +58,7 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
             onChange={onChange}
             maxNumber={maxNumber}
             dataURLKey="data_url"
-            acceptType={["jpg"]}
+            acceptType={["jpg", "png"]}
           >
             {({ imageList, onImageUpload, onImageRemove, dragProps }) => (
               // write your building UI
@@ -61,11 +74,7 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
                 </button>
                 {imageList.map((image, index) => (
                   <div key={index} className="image-item">
-                    <img
-                      src={image.data_url}
-                      alt=""
-                      className="image-item-photo"
-                    />
+                    <img src={image.data_url} className="image-item-photo" />
                     <div className="image-item__btn-wrapper">
                       <button onClick={() => onImageRemove(index)}>
                         Remove
