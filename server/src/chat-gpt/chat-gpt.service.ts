@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import OpenAI from 'openai';
+
+const openai = new OpenAI();
 
 @Injectable()
 export class ChatGptService {
@@ -30,5 +33,35 @@ export class ChatGptService {
       console.error('Error communicating with ChatGPT API', error);
       throw error;
     }
+  }
+
+  async testRequest() {
+    const completion = await openai.chat.completions.create({
+      messages: [{ role: 'system', content: 'You are a helpful assistant.' }],
+      model: 'gpt-4o-mini',
+    });
+
+    return completion;
+  }
+
+  async analyzeImage(image: string) {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: 'What’s in this image?' },
+            {
+              type: 'image_url',
+              image_url: {
+                url: image,
+              },
+            },
+          ],
+        },
+      ],
+    });
+    return response;
   }
 }

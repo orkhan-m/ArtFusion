@@ -10,6 +10,7 @@ import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
+import { CreateNFTModal } from "./CreateNFTModal";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -18,6 +19,7 @@ export const Game: React.FC = () => {
 
   const [wallet, setWalletAddress] = useState<string>("");
   const [collection, setCollectionAddress] = useState<string>("");
+  const [isCreateNFTModalOpen, setIsCreateNFTModalOpen] = useState(false);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -94,33 +96,41 @@ export const Game: React.FC = () => {
     }
   }, [wallet, collection]);
 
+  const openModal = () => {
+    setIsCreateNFTModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsCreateNFTModalOpen(false);
+  };
+
   return (
     <div>
       <div className="address-wrapper">
         <div>
-          <label className="form-label">Your wallet address:</label>
-          <input
-            type="text"
-            value={wallet}
-            readOnly
-            className="form-control"
-          ></input>
+          <label>Your wallet address:</label>
+          <input type="text" value={wallet} readOnly></input>
         </div>
         <div>
-          <label className="form-label">Collection address:</label>
-          <input
-            type="text"
-            value={collection}
-            readOnly
-            className="form-control"
-          ></input>
+          <label>Collection address:</label>
+          <input type="text" value={collection} readOnly></input>
         </div>
       </div>
       <div className="mt-4">
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="dnd-wrapper">
             <div className="dnd-item">
-              <h5>Your Collection</h5>
+              <div className="dnd-item-header">
+                <h5>Your Collection</h5>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={openModal}
+                >
+                  Create new NFT
+                </button>
+              </div>
+
               <Droppable droppableId="cards" direction="horizontal">
                 {(provided) => (
                   <div
@@ -152,7 +162,13 @@ export const Game: React.FC = () => {
             </div>
 
             <div className="dnd-item">
-              <h5>Mixer area (drop here your nfts to combine them)</h5>
+              <div className="dnd-item-header">
+                <h5>Mixer area (drop here your nfts to combine them)</h5>
+                <button type="button" className="btn btn-primary">
+                  Shake them!
+                </button>
+              </div>
+
               <Droppable droppableId="dropArea" direction="horizontal">
                 {(provided) => (
                   <div
@@ -185,6 +201,7 @@ export const Game: React.FC = () => {
           </div>
         </DragDropContext>
       </div>
+      <CreateNFTModal isOpen={isCreateNFTModalOpen} onClose={closeModal} />
     </div>
   );
 };
