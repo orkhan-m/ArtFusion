@@ -116,7 +116,7 @@ export const Game: React.FC = () => {
       .post<
         NFTBaseData[],
         AxiosResponse<any>
-      >("http://localhost:4000/chat-gpt/generateImage", GENERATE_IMAGE_MOCK_INPUT)
+      >("http://localhost:4000/createNFT", GENERATE_IMAGE_MOCK_INPUT)
       .then((response) => response.data);
   };
 

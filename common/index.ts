@@ -5,11 +5,11 @@ export interface NFTBaseData {
 
 export const GENERATE_IMAGE_MOCK_INPUT: NFTBaseData[] = [
   {
-    name: "AirPods",
-    description: "AirPods from Apple company",
+    name: "Vintage Typewriter",
+    description: "A classic typewriter with a mechanical keyboard",
   },
   {
-    name: "Pen",
-    description: "Simple pen for writing",
+    name: "Drone",
+    description: "A high-tech drone with a camera for aerial photography",
   },
 ];
