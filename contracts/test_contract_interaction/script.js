@@ -1,4 +1,4 @@
-const contractAddress = "0x94279512639b8bfc474e5350e11b78224280d736"; // Replace with your deployed contract address
+const contractAddress = "0x7075d028ac69eac0e91215947deda5ca863f77a7"; // Replace with your deployed contract address
 const contractABI = [
   {
     inputs: [
@@ -570,9 +570,9 @@ const contractABI = [
 let web3;
 let contract;
 
-const connectButton = document.getElementById("checkmm");
+const checkMetaMask = document.getElementById("checkMetaMask");
 
-connectButton.addEventListener("click", () => {
+checkMetaMask.addEventListener("click", () => {
   if (typeof window.ethereum !== "undefined") {
     console.log("MetaMask installed");
   } else {
@@ -611,23 +611,6 @@ document.getElementById("connectButton").addEventListener("click", async () => {
   }
 });
 
-// async function displayNFTs(account) {
-//   const balance = await contract.methods.balanceOf(account).call();
-//   const nftList = document.getElementById("nftList");
-//   nftList.innerHTML = "";
-
-//   for (let i = 0; i < balance; i++) {
-//     const tokenId = await contract.methods
-//       .tokenOfOwnerByIndex(account, i)
-//       .call();
-//     const tokenURI = await contract.methods.tokenURI(tokenId).call();
-//     const nftItem = document.createElement("div");
-//     nftItem.className = "nft-item";
-//     nftItem.innerText = `Token ID: ${tokenId} - URI: ${tokenURI}`;
-//     nftList.appendChild(nftItem);
-//   }
-// }
-
 async function displayNFTs(account) {
   const balance = await contract.methods.balanceOf(account).call();
   const nftList = document.getElementById("nftList");
@@ -650,7 +633,8 @@ async function displayNFTs(account) {
       const metadata = await response.json();
 
       // Extract the image URL from the metadata
-      const imageUrl = metadata.image;
+      const imageUrl =
+        metadata.image || "https://via.placeholder.com/200?text=No+Image";
 
       // Create a new div for each NFT
       const nftItem = document.createElement("div");
@@ -667,7 +651,9 @@ async function displayNFTs(account) {
 
       // Create a paragraph for the token ID and URI
       const infoElement = document.createElement("p");
-      infoElement.innerText = `Token ID: ${tokenId} - Name: ${metadata.name}`;
+      infoElement.innerText = `Token ID: ${tokenId} - Name: ${
+        metadata.name || "Unknown"
+      }`;
 
       // Add the info text to the nftItem div
       nftItem.appendChild(infoElement);
@@ -676,6 +662,73 @@ async function displayNFTs(account) {
       nftList.appendChild(nftItem);
     } catch (error) {
       console.error("Error fetching NFT metadata:", error);
+
+      // Display the token ID even if metadata fetching fails
+      const nftItem = document.createElement("div");
+      nftItem.className = "nft-item";
+
+      const infoElement = document.createElement("p");
+      infoElement.innerText = `Token ID: ${tokenId} - Failed to load metadata`;
+
+      nftItem.appendChild(infoElement);
+      nftList.appendChild(nftItem);
     }
   }
 }
+
+// Add event listener for minting NFTs
+document.getElementById("mintButton").addEventListener("click", async () => {
+  const tokenUriInput = document.getElementById("tokenUriInput").value;
+
+  if (!tokenUriInput) {
+    alert("Please enter a valid token URI");
+    return;
+  }
+
+  try {
+    const accounts = await web3.eth.getAccounts();
+    const account = accounts[0];
+
+    // Call the mintNFT function from the smart contract
+    await contract.methods.mintNFT(tokenUriInput).send({ from: account });
+
+    alert("NFT Minted Successfully!");
+
+    // Refresh the displayed NFTs
+    displayNFTs(account);
+  } catch (error) {
+    console.error("Error minting NFT:", error);
+    alert("Error minting NFT. Check the console for details.");
+  }
+});
+
+// Add event listener for burning two NFTs and minting a new one
+document
+  .getElementById("burnAndMintButton")
+  .addEventListener("click", async () => {
+    const burnTokenId1 = document.getElementById("burnTokenId1").value;
+    const burnTokenId2 = document.getElementById("burnTokenId2").value;
+    const newTokenUri = document.getElementById("newTokenUriInput").value;
+
+    if (!burnTokenId1 || !burnTokenId2 || !newTokenUri) {
+      alert("Please enter two valid token IDs and a new token URI");
+      return;
+    }
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+      const account = accounts[0];
+
+      // Call the burnAndMintNew function from the smart contract
+      await contract.methods
+        .burnAndMintNew([burnTokenId1, burnTokenId2], newTokenUri)
+        .send({ from: account });
+
+      alert("Two NFTs burned and a new one minted successfully!");
+
+      // Refresh the displayed NFTs
+      displayNFTs(account);
+    } catch (error) {
+      console.error("Error burning NFTs and minting new one:", error);
+    }
+  });

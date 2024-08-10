@@ -2,14 +2,15 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
-contract BasicNFT is ERC721 {
+contract ArtFusion is ERC721Enumerable {
     uint256 private s_tokenCounter;
     mapping(uint256 => string) private s_tokenIdToUri;
     mapping(address => uint256) public usersNFTs;
 
     // create NFT Name & Symbol
-    constructor() ERC721("ArtFusion", "ART") {
+    constructor() ERC721("ArtFusion", "ATF") {
         s_tokenCounter = 0;
     }
 
@@ -20,7 +21,7 @@ contract BasicNFT is ERC721 {
         s_tokenCounter++;
     }
 
-    // override token URI
+    // check token URI
     function tokenURI(
         uint256 tokenId
     ) public view override returns (string memory) {
@@ -32,7 +33,7 @@ contract BasicNFT is ERC721 {
         uint256[] memory tokenIds,
         string memory newTokenUri
     ) public {
-        require(tokenIds.length >= 2, "Must burn at least two NFTs");
+        require(tokenIds.length == 2, "Must burn two NFTs");
 
         // Check ownership and burn each NFT
         for (uint256 i = 0; i < tokenIds.length; i++) {
@@ -43,11 +44,10 @@ contract BasicNFT is ERC721 {
             );
             _burn(tokenId);
             delete s_tokenIdToUri[tokenId]; // Remove URI mapping of burned tokens
-
-            // Mint a new NFT with the provided URI
-            s_tokenIdToUri[s_tokenCounter] = newTokenUri;
-            _safeMint(msg.sender, s_tokenCounter);
-            s_tokenCounter++;
         }
+        // Mint a new NFT with the provided URI
+        s_tokenIdToUri[s_tokenCounter] = newTokenUri;
+        _safeMint(msg.sender, s_tokenCounter);
+        s_tokenCounter++;
     }
 }
