@@ -6,7 +6,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
+import { ALCHEMY_ACTIONS_API_KEY, DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
@@ -70,18 +70,15 @@ export const Game: React.FC = () => {
 
   const fetchNFTs = async () => {
     let nfts: NFT[] = [];
-    const api_key = "tFRus-ejJq6yuZyv0jLCrrn2y5eCLsyK";
-    const baseURL = `https://eth-mainnet.g.alchemy.com/v2/${api_key}/getNFTs/`;
-    var requestOptions = {
-      method: "GET",
-    };
-
+    const baseURL = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_ACTIONS_API_KEY}/getNFTs/`;
     const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
+
     try {
-      nfts = await fetch(fetchURL, requestOptions)
-        .then((data) => data.json())
-        .then((data) => data.ownedNfts);
-    } catch {}
+      const response = await axios.get(fetchURL);
+      nfts = response.data.ownedNfts;
+    } catch (error) {
+      console.log(error);
+    }
 
     if (nfts) {
       setNfts(nfts as NFT[]);
@@ -89,7 +86,7 @@ export const Game: React.FC = () => {
   };
 
   useEffect(() => {
-    setWalletAddress(DEFAULT_ETH_ADDRESS);
+    setWalletAddress(user?.address!);
     setCollectionAddress(DEFAULT_CONTRACT_ADDRESS);
   }, [user?.address]);
 
