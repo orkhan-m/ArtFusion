@@ -9,7 +9,7 @@ contract BasicNFT is ERC721 {
     mapping(address => uint256) public usersNFTs;
 
     // create NFT Name & Symbol
-    constructor() ERC721("Dogie", "DOG") {
+    constructor() ERC721("ArtFusion", "ART") {
         s_tokenCounter = 0;
     }
 
