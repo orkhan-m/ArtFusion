@@ -9,23 +9,49 @@ import {
 } from "@hello-pangea/dnd";
 import { DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
-import { useSigner, useUser } from "@account-kit/react";
+import {
+  useSendUserOperation,
+  useSigner,
+  useSmartAccountClient,
+  useUser,
+} from "@account-kit/react";
 import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
 import { OwnedNft } from "alchemy-sdk";
 import { alchemyClient } from "@/config";
+import { encodeFunctionData } from "viem";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
   const user = useUser();
-  const signer = useSigner();
 
   const [wallet, setWalletAddress] = useState<string>("");
   const [collection, setCollectionAddress] = useState<string>("");
   const [isCreateNFTModalOpen, setIsCreateNFTModalOpen] = useState(false);
+
+  /**
+   * Assumes the app has context of a signer with an authenticated user
+   * by using the `AlchemyAccountProvider` from `@alchemy/aa-alchemy/react`.
+   */
+  const { client, address } = useSmartAccountClient({
+    type: "MultiOwnerModularAccount",
+  });
+  const userOperation = useSendUserOperation({
+    client,
+    onSuccess: ({ hash, request }) => {
+      console.log(hash);
+      console.log(request);
+      // [optional] Do something with the hash and request
+    },
+    onError: (error) => {
+      console.log(error);
+      // [optional] Do something with the error
+    },
+    // [optional] ...additional mutationArgs
+  });
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -124,13 +150,30 @@ export const Game: React.FC = () => {
   });
 
   const test = async () => {
-    await signer?.exportWallet({
-      iframeContainerId: "alchemy-signer-iframe-container",
-    });
-    const el = document.querySelector(
-      "#alchemy-signer-iframe-container"
-    )?.innerHTML;
-    console.log(el);
+    // const AlchemyTokenAbi = [
+    //   {
+    //     inputs: [
+    //       { internalType: "address", name: "recipient", type: "address" },
+    //     ],
+    //     name: "mint",
+    //     outputs: [],
+    //     stateMutability: "nonpayable",
+    //     type: "function",
+    //   },
+    // ];
+    // const uoCallData = encodeFunctionData({
+    //   abi: AlchemyTokenAbi,
+    //   functionName: "mint",
+    //   args: [address],
+    // });
+    // const uo = await userOperation.sendUserOperation({
+    //   uo: {
+    //     target: "0x2e5aD363bAa38960c679bf52dF0E633560B28E87",
+    //     data: uoCallData,
+    //   },
+    // });
+    // const txHash = await userOperation.waitForUserOperationTransaction(uo);
+    // console.log(txHash);
   };
 
   // async function mintNFT() {
