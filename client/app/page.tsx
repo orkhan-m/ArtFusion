@@ -1,4 +1,5 @@
 "use client";
+
 import { useLogout, useSignerStatus, useUser } from "@account-kit/react";
 import { Login } from "./components/Login";
 import { Game } from "./components/Game";

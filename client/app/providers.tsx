@@ -1,4 +1,5 @@
 "use client";
+
 import { config, queryClient } from "@/config";
 import { AlchemyClientState } from "@account-kit/core";
 import { AlchemyAccountProvider } from "@account-kit/react";
