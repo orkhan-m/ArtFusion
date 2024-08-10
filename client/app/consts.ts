@@ -4,3 +4,4 @@ export const DEFAULT_CONTRACT_ADDRESS =
 
 export const ALCHEMY_ACCOUNTS_API_KEY = "K9lNAjXCyoltcpA54QhD0zcxbRMsDAbQ";
 export const ALCHEMY_ACTIONS_API_KEY = "tFRus-ejJq6yuZyv0jLCrrn2y5eCLsyK";
+export const ALCHEMY_ACCESS_KEY = "alcht_sjAbNa3XatFkZTsgEkVbJ7thpOCTlA";
