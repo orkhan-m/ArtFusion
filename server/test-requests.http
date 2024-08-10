@@ -5,3 +5,14 @@ content-type: application/json
 {
   "prompt": "Hello, how are you?"
 }
+
+##################################################
+
+POST http://localhost:4000/chat-gpt/analyzeImage HTTP/1.1
+content-type: application/json
+
+{
+  "data_url": "https://assets.entrepreneur.com/slideshow/20171010212447-Lambo.jpeg?auto=webp&quality=95&&width=675"
+}
+
+

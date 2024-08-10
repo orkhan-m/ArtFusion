@@ -1,7 +1,6 @@
 "use client";
 
 import { OwnedNft } from "alchemy-sdk";
-import Image from "next/image";
 
 interface IProps {
   nft: OwnedNft;
@@ -10,7 +9,7 @@ interface IProps {
 export const NFTCard: React.FC<IProps> = ({ nft }) => {
   return (
     <div className="nft-card">
-      <Image
+      <img
         src={nft.image.originalUrl!}
         className="nft-card-image"
         alt={nft.image.originalUrl!}
