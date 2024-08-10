@@ -27,9 +27,9 @@ export const config = createConfig(
 
 export const queryClient = new QueryClient();
 
-const nftConfig = {
+const alchemyConfig = {
   apiKey: ALCHEMY_ACCOUNTS_API_KEY,
   network: Network.ETH_SEPOLIA,
 };
 
-export const alchemyNftClient = new Alchemy(nftConfig);
+export const alchemyClient = new Alchemy(alchemyConfig);

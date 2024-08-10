@@ -9,18 +9,19 @@ import {
 } from "@hello-pangea/dnd";
 import { DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
-import { useUser } from "@account-kit/react";
+import { useSigner, useUser } from "@account-kit/react";
 import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
-import { alchemyNftClient } from "@/config";
 import { OwnedNft } from "alchemy-sdk";
+import { alchemyClient } from "@/config";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
   const user = useUser();
+  const signer = useSigner();
 
   const [wallet, setWalletAddress] = useState<string>("");
   const [collection, setCollectionAddress] = useState<string>("");
@@ -71,7 +72,7 @@ export const Game: React.FC = () => {
   };
 
   const fetchNFTs = async () => {
-    const response = await alchemyNftClient.nft.getNftsForOwner(wallet, {
+    const response = await alchemyClient.nft.getNftsForOwner(wallet, {
       contractAddresses: [DEFAULT_CONTRACT_ADDRESS],
     });
     setNfts(response.ownedNfts);
@@ -122,6 +123,32 @@ export const Game: React.FC = () => {
     },
   });
 
+  const test = async () => {
+    await signer?.exportWallet({
+      iframeContainerId: "alchemy-signer-iframe-container",
+    });
+    const el = document.querySelector(
+      "#alchemy-signer-iframe-container"
+    )?.innerHTML;
+    console.log(el);
+  };
+
+  // async function mintNFT() {
+  //   try {
+  //     // Connect signer to the contract
+  //     const contractWithSigner = nftContract.
+
+  //     // Mint the NFT
+  //     const tx = await contractWithSigner.safeMint(recipientAddress, tokenURI);
+
+  //     // Wait for the transaction to be confirmed
+  //     const receipt = await tx.wait();
+  //     console.log("NFT Minted: ", receipt);
+  //   } catch (error) {
+  //     console.error("Error minting NFT: ", error);
+  //   }
+  // }
+
   return (
     <div>
       <div className="address-wrapper">
@@ -143,7 +170,7 @@ export const Game: React.FC = () => {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={openModal}
+                  onClick={test}
                 >
                   Create new NFT
                 </button>
@@ -225,6 +252,7 @@ export const Game: React.FC = () => {
           </div>
         </DragDropContext>
       </div>
+      <div id="alchemy-signer-iframe-container"></div>
       <CreateNFTModal isOpen={isCreateNFTModalOpen} onClose={closeModal} />
     </div>
   );
