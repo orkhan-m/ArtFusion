@@ -8,17 +8,17 @@ import {
 } from "@hello-pangea/dnd";
 import { DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
-import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
 import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
 import { alchemyNftClient } from "@/config";
+import { OwnedNft } from "alchemy-sdk";
 
 export const Game: React.FC = () => {
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [droppedCards, setDroppedCards] = useState<NFT[]>([]);
+  const [nfts, setNfts] = useState<OwnedNft[]>([]);
+  const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
   const user = useUser();
 
   const [wallet, setWalletAddress] = useState<string>("");
@@ -70,27 +70,11 @@ export const Game: React.FC = () => {
   };
 
   const fetchNFTs = async () => {
-    // Get all NFTs
-    const response = await alchemyNftClient.nft.getNftsForOwner(wallet);
-    console.log(response);
+    const response = await alchemyNftClient.nft.getNftsForOwner(wallet, {
+      contractAddresses: [DEFAULT_CONTRACT_ADDRESS],
+    });
+    setNfts(response.ownedNfts);
   };
-
-  // const fetchNFTs = async () => {
-  //   let nfts: NFT[] = [];
-  //   const baseURL = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_ACTIONS_API_KEY}/getNFTs/`;
-  //   const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
-
-  //   try {
-  //     const response = await axios.get(fetchURL);
-  //     nfts = response.data.ownedNfts;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-
-  //   if (nfts) {
-  //     setNfts(nfts as NFT[]);
-  //   }
-  // };
 
   useEffect(() => {
     setWalletAddress(user?.address!);
@@ -113,8 +97,8 @@ export const Game: React.FC = () => {
 
   const sendNFTData = async () => {
     const data: NFTBaseData[] = droppedCards.map((i) => ({
-      name: i.title,
-      description: i.description,
+      name: i.name!,
+      description: i.description!,
     }));
     return axios
       .post<
@@ -173,8 +157,8 @@ export const Game: React.FC = () => {
                   >
                     {nfts.map((nft, index) => (
                       <Draggable
-                        key={nft.id.tokenId}
-                        draggableId={nft.id.tokenId}
+                        key={nft.tokenId}
+                        draggableId={nft.tokenId}
                         index={index}
                       >
                         {(provided) => (
@@ -217,8 +201,8 @@ export const Game: React.FC = () => {
                   >
                     {droppedCards.map((nft, index) => (
                       <Draggable
-                        key={nft.id.tokenId}
-                        draggableId={nft.id.tokenId}
+                        key={nft.tokenId}
+                        draggableId={nft.tokenId}
                         index={index}
                       >
                         {(provided) => (
