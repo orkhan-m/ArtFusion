@@ -1,4 +1,4 @@
-const contractAddress = "0x7e5d72ce2eb90911520a8ff1dafcac2b3af2ccf2"; // Replace with your deployed contract address
+const contractAddress = "0x7075d028ac69eac0e91215947deda5ca863f77a7"; // Replace with your deployed contract address
 const contractABI = [
   {
     inputs: [
@@ -570,9 +570,9 @@ const contractABI = [
 let web3;
 let contract;
 
-const connectButton = document.getElementById("checkmm");
+const checkMetaMask = document.getElementById("checkMetaMask");
 
-connectButton.addEventListener("click", () => {
+checkMetaMask.addEventListener("click", () => {
   if (typeof window.ethereum !== "undefined") {
     console.log("MetaMask installed");
   } else {
