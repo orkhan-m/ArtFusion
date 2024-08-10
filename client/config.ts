@@ -6,6 +6,7 @@ import {
 import { QueryClient } from "@tanstack/react-query";
 import { sepolia } from "@account-kit/infra";
 import { ALCHEMY_ACCOUNTS_API_KEY } from "./app/consts";
+import { Alchemy, Network } from "alchemy-sdk";
 
 const uiConfig: AlchemyAccountsUIConfig = {
   illustrationStyle: "outline",
@@ -25,3 +26,10 @@ export const config = createConfig(
 );
 
 export const queryClient = new QueryClient();
+
+const nftConfig = {
+  apiKey: ALCHEMY_ACCOUNTS_API_KEY,
+  network: Network.ETH_SEPOLIA,
+};
+
+export const alchemyNftClient = new Alchemy(nftConfig);

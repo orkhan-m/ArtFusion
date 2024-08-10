@@ -6,7 +6,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { ALCHEMY_ACTIONS_API_KEY, DEFAULT_CONTRACT_ADDRESS } from "../consts";
+import { DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
@@ -14,6 +14,7 @@ import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
+import { alchemyNftClient } from "@/config";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<NFT[]>([]);
@@ -69,21 +70,27 @@ export const Game: React.FC = () => {
   };
 
   const fetchNFTs = async () => {
-    let nfts: NFT[] = [];
-    const baseURL = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_ACTIONS_API_KEY}/getNFTs/`;
-    const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
-
-    try {
-      const response = await axios.get(fetchURL);
-      nfts = response.data.ownedNfts;
-    } catch (error) {
-      console.log(error);
-    }
-
-    if (nfts) {
-      setNfts(nfts as NFT[]);
-    }
+    // Get all NFTs
+    const response = await alchemyNftClient.nft.getNftsForOwner(wallet);
+    console.log(response);
   };
+
+  // const fetchNFTs = async () => {
+  //   let nfts: NFT[] = [];
+  //   const baseURL = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_ACTIONS_API_KEY}/getNFTs/`;
+  //   const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
+
+  //   try {
+  //     const response = await axios.get(fetchURL);
+  //     nfts = response.data.ownedNfts;
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+
+  //   if (nfts) {
+  //     setNfts(nfts as NFT[]);
+  //   }
+  // };
 
   useEffect(() => {
     setWalletAddress(user?.address!);
