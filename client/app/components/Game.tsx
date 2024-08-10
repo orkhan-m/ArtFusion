@@ -7,45 +7,35 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { DEFAULT_CONTRACT_ADDRESS } from "../consts";
+import { CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
 import { OwnedNft } from "alchemy-sdk";
-import { alchemyClient } from "@/config";
+import {
+  accountType,
+  alchemyClient,
+  gasManagerConfig,
+  accountClientOptions as opts,
+} from "@/config";
 import { useSmartAccountClient, useUser } from "@alchemy/aa-alchemy/react";
+import { encodeFunctionData, Hex } from "viem";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
+  const { client } = useSmartAccountClient({
+    type: accountType,
+    gasManagerConfig,
+    opts,
+  });
   const user = useUser();
 
   const [wallet, setWalletAddress] = useState<string>("");
   const [collection, setCollectionAddress] = useState<string>("");
   const [isCreateNFTModalOpen, setIsCreateNFTModalOpen] = useState(false);
-
-  /**
-   * Assumes the app has context of a signer with an authenticated user
-   * by using the `AlchemyAccountProvider` from `@alchemy/aa-alchemy/react`.
-   */
-  const { client, address } = useSmartAccountClient({
-    type: "MultiOwnerModularAccount",
-  });
-  // const userOperation = useSendUserOperation({
-  //   client,
-  //   onSuccess: ({ hash, request }) => {
-  //     console.log(hash);
-  //     console.log(request);
-  //     // [optional] Do something with the hash and request
-  //   },
-  //   onError: (error) => {
-  //     console.log(error);
-  //     // [optional] Do something with the error
-  //   },
-  //   // [optional] ...additional mutationArgs
-  // });
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -92,7 +82,7 @@ export const Game: React.FC = () => {
   };
 
   const fetchNFTs = async () => {
-    const response = await alchemyClient.nft.getNftsForOwner(wallet, {
+    const response = await alchemyClient.nft.getNftsForOwner(user?.address!, {
       contractAddresses: [DEFAULT_CONTRACT_ADDRESS],
     });
     setNfts(response.ownedNfts);
@@ -144,47 +134,23 @@ export const Game: React.FC = () => {
   });
 
   const test = async () => {
-    // const AlchemyTokenAbi = [
-    //   {
-    //     inputs: [
-    //       { internalType: "address", name: "recipient", type: "address" },
-    //     ],
-    //     name: "mint",
-    //     outputs: [],
-    //     stateMutability: "nonpayable",
-    //     type: "function",
-    //   },
-    // ];
-    // const uoCallData = encodeFunctionData({
-    //   abi: AlchemyTokenAbi,
-    //   functionName: "mint",
-    //   args: [address],
-    // });
-    // const uo = await userOperation.sendUserOperation({
-    //   uo: {
-    //     target: "0x2e5aD363bAa38960c679bf52dF0E633560B28E87",
-    //     data: uoCallData,
-    //   },
-    // });
-    // const txHash = await userOperation.waitForUserOperationTransaction(uo);
-    // console.log(txHash);
+    const tokenUri = "ipfs://QmUYxc1mWMDtc2PLbr9rd1GxVTJheU288LAxR6dQko2W3W";
+    const uoCallData = encodeFunctionData({
+      abi: CONTRACT_ABI,
+      functionName: "mintNFT",
+      args: [tokenUri],
+    });
+
+    const uo = await client!.sendUserOperation({
+      uo: {
+        target: wallet as Hex,
+        data: uoCallData,
+      },
+    });
+
+    const txHash = await client!.waitForUserOperationTransaction(uo);
+    console.log(txHash);
   };
-
-  // async function mintNFT() {
-  //   try {
-  //     // Connect signer to the contract
-  //     const contractWithSigner = nftContract.
-
-  //     // Mint the NFT
-  //     const tx = await contractWithSigner.safeMint(recipientAddress, tokenURI);
-
-  //     // Wait for the transaction to be confirmed
-  //     const receipt = await tx.wait();
-  //     console.log("NFT Minted: ", receipt);
-  //   } catch (error) {
-  //     console.error("Error minting NFT: ", error);
-  //   }
-  // }
 
   return (
     <div>
