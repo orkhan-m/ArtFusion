@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import {
   DragDropContext,
@@ -6,15 +7,19 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { DEFAULT_CONTRACT_ADDRESS, DEFAULT_ETH_ADDRESS } from "../consts";
+import { DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
-import { NFT } from "../models";
 import { useUser } from "@account-kit/react";
 import { CreateNFTModal } from "./CreateNFTModal";
+import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosResponse } from "axios";
+import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
+import { alchemyNftClient } from "@/config";
+import { OwnedNft } from "alchemy-sdk";
 
 export const Game: React.FC = () => {
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [droppedCards, setDroppedCards] = useState<NFT[]>([]);
+  const [nfts, setNfts] = useState<OwnedNft[]>([]);
+  const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
   const user = useUser();
 
   const [wallet, setWalletAddress] = useState<string>("");
@@ -66,27 +71,14 @@ export const Game: React.FC = () => {
   };
 
   const fetchNFTs = async () => {
-    let nfts: NFT[] = [];
-    const api_key = "tFRus-ejJq6yuZyv0jLCrrn2y5eCLsyK";
-    const baseURL = `https://eth-mainnet.g.alchemy.com/v2/${api_key}/getNFTs/`;
-    var requestOptions = {
-      method: "GET",
-    };
-
-    const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
-    try {
-      nfts = await fetch(fetchURL, requestOptions)
-        .then((data) => data.json())
-        .then((data) => data.ownedNfts);
-    } catch {}
-
-    if (nfts) {
-      setNfts(nfts as NFT[]);
-    }
+    const response = await alchemyNftClient.nft.getNftsForOwner(wallet, {
+      contractAddresses: [DEFAULT_CONTRACT_ADDRESS],
+    });
+    setNfts(response.ownedNfts);
   };
 
   useEffect(() => {
-    setWalletAddress(DEFAULT_ETH_ADDRESS);
+    setWalletAddress(user?.address!);
     setCollectionAddress(DEFAULT_CONTRACT_ADDRESS);
   }, [user?.address]);
 
@@ -103,6 +95,32 @@ export const Game: React.FC = () => {
   const closeModal = () => {
     setIsCreateNFTModalOpen(false);
   };
+
+  const sendNFTData = async () => {
+    const data: NFTBaseData[] = droppedCards.map((i) => ({
+      name: i.name!,
+      description: i.description!,
+    }));
+    return axios
+      .post<
+        NFTBaseData[],
+        AxiosResponse<any>
+      >("http://localhost:4000/createNFT", GENERATE_IMAGE_MOCK_INPUT)
+      .then((response) => response.data);
+  };
+
+  const {
+    isPending: isGenerateImageLoading,
+    mutate: generateImage,
+    data: generateImageData,
+  } = useMutation({
+    mutationFn: () => {
+      return sendNFTData();
+    },
+    onSuccess: (data) => {
+      console.log(data);
+    },
+  });
 
   return (
     <div>
@@ -140,8 +158,8 @@ export const Game: React.FC = () => {
                   >
                     {nfts.map((nft, index) => (
                       <Draggable
-                        key={nft.id.tokenId}
-                        draggableId={nft.id.tokenId}
+                        key={nft.tokenId}
+                        draggableId={nft.tokenId}
                         index={index}
                       >
                         {(provided) => (
@@ -164,7 +182,13 @@ export const Game: React.FC = () => {
             <div className="dnd-item">
               <div className="dnd-item-header">
                 <h5>Mixer area (drop here your nfts to combine them)</h5>
-                <button type="button" className="btn btn-primary">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    generateImage();
+                  }}
+                >
                   Shake them!
                 </button>
               </div>
@@ -178,8 +202,8 @@ export const Game: React.FC = () => {
                   >
                     {droppedCards.map((nft, index) => (
                       <Draggable
-                        key={nft.id.tokenId}
-                        draggableId={nft.id.tokenId}
+                        key={nft.tokenId}
+                        draggableId={nft.tokenId}
                         index={index}
                       >
                         {(provided) => (
