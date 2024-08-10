@@ -9,19 +9,13 @@ import {
 } from "@hello-pangea/dnd";
 import { DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
-import {
-  useSendUserOperation,
-  useSigner,
-  useSmartAccountClient,
-  useUser,
-} from "@account-kit/react";
 import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
 import { OwnedNft } from "alchemy-sdk";
 import { alchemyClient } from "@/config";
-import { encodeFunctionData } from "viem";
+import { useSmartAccountClient, useUser } from "@alchemy/aa-alchemy/react";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
@@ -39,19 +33,19 @@ export const Game: React.FC = () => {
   const { client, address } = useSmartAccountClient({
     type: "MultiOwnerModularAccount",
   });
-  const userOperation = useSendUserOperation({
-    client,
-    onSuccess: ({ hash, request }) => {
-      console.log(hash);
-      console.log(request);
-      // [optional] Do something with the hash and request
-    },
-    onError: (error) => {
-      console.log(error);
-      // [optional] Do something with the error
-    },
-    // [optional] ...additional mutationArgs
-  });
+  // const userOperation = useSendUserOperation({
+  //   client,
+  //   onSuccess: ({ hash, request }) => {
+  //     console.log(hash);
+  //     console.log(request);
+  //     // [optional] Do something with the hash and request
+  //   },
+  //   onError: (error) => {
+  //     console.log(error);
+  //     // [optional] Do something with the error
+  //   },
+  //   // [optional] ...additional mutationArgs
+  // });
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
