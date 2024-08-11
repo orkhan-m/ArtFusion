@@ -22,6 +22,7 @@ import {
 } from "@account-kit/react";
 import classNames from "classnames";
 import { encodeFunctionData, Hex } from "viem";
+import { enqueueSnackbar } from "notistack";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
@@ -155,8 +156,12 @@ export const Game: React.FC = () => {
   useEffect(() => {
     if (sendUserOperationResult || isSendUserOperationError) {
       setIsShaking(false);
-      setDroppedCards([]);
-      fetchNFTs();
+      enqueueSnackbar(
+        "NFT has been created! You'll be able to see it in a seconds..."
+      );
+      setTimeout(() => {
+        window.location.reload();
+      }, 2500);
     }
   }, [sendUserOperationResult, isSendUserOperationError]);
 
