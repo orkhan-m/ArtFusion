@@ -164,7 +164,7 @@ export const CreateNFTModal: React.FC<IProps> = ({
             onChange={onChange}
             maxNumber={maxNumber}
             dataURLKey="data_url"
-            acceptType={["jpg", "png"]}
+            acceptType={["jpg", "png", "jpeg", "webp"]}
           >
             {({ imageList, onImageUpload, onImageRemove, dragProps }) => (
               // write your building UI
