@@ -78,6 +78,7 @@ export class AppService {
 
   async shakeNFTs(data: NFTBaseData[]) {
     const shakeNFTsPrompt = this.getShakeNFTsPrompt(data);
+    console.log('shakeNFTsPrompt: ', shakeNFTsPrompt);
     const openaiImage = await openai.images.generate({
       model: 'dall-e-2',
       prompt: shakeNFTsPrompt,
@@ -85,16 +86,19 @@ export class AppService {
       size: '256x256',
       response_format: 'url', // url or b64_json
     });
+    console.log('openaiImage.data[0].url: ', openaiImage.data[0].url);
     const analyzeImageResponse = await this.analyzeImage(
       openaiImage.data[0].url,
     );
     const content = analyzeImageResponse.choices[0].message.content;
+    console.log('content: ', content);
     const fields = content.split('.').map((i) => i.trim());
     const metadata: CreateNFTMetadataRequest = {
       name: fields[0],
       description: fields[1],
       imageUrl: openaiImage.data[0].url,
     };
+    console.log('metadata: ', metadata);
     const response = await this.createNFTMetadata(metadata, 'url');
     return response;
   }
@@ -115,12 +119,9 @@ export class AppService {
       const id = uuidv4();
       let uploadImageResponse;
       if (type === 'url') {
-        uploadImageResponse = await this.pinata.upload.url(
-          data.imageUrl.split(',')[1],
-          {
-            metadata: { name: `${id}_${data.name}` },
-          },
-        );
+        uploadImageResponse = await this.pinata.upload.url(data.imageUrl, {
+          metadata: { name: `${id}_${data.name}` },
+        });
       } else if (type === 'base64') {
         uploadImageResponse = await this.pinata.upload.base64(
           data.imageUrl.split(',')[1],

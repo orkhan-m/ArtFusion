@@ -8,15 +8,6 @@ export const ALCHEMY_ACCOUNTS_API_KEY = "K9lNAjXCyoltcpA54QhD0zcxbRMsDAbQ";
 export const ALCHEMY_ACCESS_KEY = "alcht_sjAbNa3XatFkZTsgEkVbJ7thpOCTlA";
 export const ALCHEMY_GAS_POLICY_ID = "0f0bd52c-de65-4c23-b712-2f07d0f3515f";
 
-export const GENERATE_IMAGE_MOCK_INPUT: NFTBaseData[] = [
-  {
-    name: "Vintage Typewriter",
-  },
-  {
-    name: "Drone",
-  },
-];
-
 export const CONTRACT_ABI = [
   {
     inputs: [],

@@ -7,17 +7,12 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import {
-  CONTRACT_ABI,
-  DEFAULT_CONTRACT_ADDRESS,
-  GENERATE_IMAGE_MOCK_INPUT,
-} from "../consts";
+import { CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { CreateNFTMetadataResponse, CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { OwnedNft } from "alchemy-sdk";
-import { OpStatus } from "./op-status";
 import { alchemyClient } from "@/config";
 import { NFTBaseData } from "../models";
 import {
@@ -122,32 +117,8 @@ export const Game: React.FC = () => {
     setIsCreateNFTModalOpen(false);
   };
 
-  const sendNFTData = async () => {
-    const data: NFTBaseData[] = droppedCards.map((i) => ({
-      name: i.name!,
-    }));
-    return axios
-      .post<NFTBaseData[], AxiosResponse<any>>(
-        "http://localhost:4000/createNFT",
-        GENERATE_IMAGE_MOCK_INPUT
-      )
-      .then((response) => response.data);
-  };
-
-  const {
-    isPending: isGenerateImageLoading,
-    mutate: generateImage,
-    data: generateImageData,
-  } = useMutation({
-    mutationFn: () => {
-      return sendNFTData();
-    },
-    onSuccess: (data) => {
-      console.log(data);
-    },
-  });
-
   const shakeNFTsRequest = async (data: NFTBaseData[]) => {
+    setIsShaking(true);
     return axios
       .post<NFTBaseData[], AxiosResponse<CreateNFTMetadataResponse>>(
         "http://localhost:4000/shakeNFTs",
@@ -158,6 +129,7 @@ export const Game: React.FC = () => {
 
   const burnAndMintNew = async (tokenUri: string) => {
     const tokenIds = droppedCards.map((i) => i.tokenId);
+    console.log(tokenIds);
     const uoCallData = encodeFunctionData({
       abi: CONTRACT_ABI,
       functionName: "burnAndMintNew",
@@ -179,6 +151,17 @@ export const Game: React.FC = () => {
       burnAndMintNew(data.IpfsHash);
     },
   });
+
+  useEffect(() => {
+    if (sendUserOperationResult || isSendUserOperationError) {
+      setIsShaking(false);
+    }
+    console.log("sendUserOperationResult", sendUserOperationResult);
+  }, [sendUserOperationResult, isSendUserOperationError]);
+
+  useEffect(() => {
+    console.log("isSendUserOperationError", isSendUserOperationError);
+  }, [isSendUserOperationError]);
 
   return (
     <div>
@@ -204,6 +187,7 @@ export const Game: React.FC = () => {
                   <button className="btn btn-primary" onClick={openModal}>
                     Create new NFT
                   </button>
+                  {isShaking && <div>We are combining your NFTs!</div>}
                 </div>
 
                 <Droppable droppableId="cards" direction="horizontal">
@@ -242,7 +226,10 @@ export const Game: React.FC = () => {
                   <button
                     className="btn btn-primary"
                     onClick={() => {
-                      generateImage();
+                      const data: NFTBaseData[] = droppedCards.map((i) => ({
+                        name: i.name!,
+                      }));
+                      shakeNFTs(data);
                     }}
                   >
                     Shake them!
@@ -283,11 +270,6 @@ export const Game: React.FC = () => {
         </div>
       )}
 
-      <OpStatus
-        sendUserOperationResult={sendUserOperationResult}
-        isSendingUserOperation={isSendingUserOperation}
-        isSendUserOperationError={isSendUserOperationError}
-      />
       {isCreateNFTModalOpen && (
         <CreateNFTModal
           isOpen={isCreateNFTModalOpen}
