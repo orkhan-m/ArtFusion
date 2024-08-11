@@ -1,3 +1,5 @@
+"use client";
+
 import Modal from "react-modal";
 import ImageUploading, { ImageType } from "react-images-uploading";
 import { useState } from "react";
@@ -5,6 +7,18 @@ import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import TypingEffect from "../utils";
 import { ChatCompletion } from "../models";
+import { encodeFunctionData, Hex } from "viem";
+import { CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
+import {
+  useSendUserOperation,
+  useSmartAccountClient,
+  useUser,
+} from "@alchemy/aa-alchemy/react";
+import {
+  accountType,
+  gasManagerConfig,
+  accountClientOptions as opts,
+} from "@/config";
 
 const customStyles = {
   content: {
@@ -24,6 +38,19 @@ interface IProps {
 
 export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
   const [images, setImages] = useState<ImageType[]>([]);
+  const user = useUser();
+  const { client } = useSmartAccountClient({
+    type: accountType,
+    gasManagerConfig,
+    opts,
+  });
+  const {
+    sendUserOperation,
+    sendUserOperationResult,
+    isSendingUserOperation,
+    error: isSendUserOperationError,
+  } = useSendUserOperation({ client, waitForTxn: true });
+
   const maxNumber = 1;
   const onChange = (images: any) => {
     setImages(images);
@@ -57,6 +84,24 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
     },
   });
 
+  const test = async () => {
+    console.log("test");
+    const tokenUri = "ipfs://QmUYxc1mWMDtc2PLbr9rd1GxVTJheU288LAxR6dQko2W3W";
+    const uoCallData = encodeFunctionData({
+      abi: CONTRACT_ABI,
+      functionName: "mintNFT",
+      args: [tokenUri, user?.address],
+    });
+    sendUserOperation({
+      uo: {
+        // NOTE: targeting user's wallet address
+        // target: wallet as Hex,
+        target: DEFAULT_CONTRACT_ADDRESS as Hex,
+        data: uoCallData,
+      },
+    });
+  };
+
   return (
     <Modal isOpen={isOpen} style={customStyles}>
       <div className="modal-header">
@@ -77,7 +122,6 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
               // write your building UI
               <div className="upload__image-wrapper">
                 <button
-                  type="button"
                   className="btn btn-primary"
                   onClick={onImageUpload}
                   {...dragProps}
@@ -87,7 +131,11 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
                 </button>
                 {imageList.map((image, index) => (
                   <div key={index} className="image-item">
-                    <img src={image.data_url} className="image-item-photo" />
+                    <img
+                      src={image.data_url}
+                      className="image-item-photo"
+                      alt={image.dataURL}
+                    />
                     <div className="image-item__btn-wrapper">
                       <button onClick={() => onImageRemove(index)}>
                         Remove
@@ -98,10 +146,11 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
               </div>
             )}
           </ImageUploading>
-          {chatGptResponse && (
+          {isAnalyzeImageLoading && <div>Our AI analyzing your image...</div>}
+          {chatGptResponse && !isAnalyzeImageLoading && (
             <div className="chat-simulation">
               <TypingEffect
-                text={chatGptResponse.choices[0].message.content}
+                text={chatGptResponse?.choices[0].message.content}
                 speed={50}
               />
             </div>
@@ -109,10 +158,10 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
       <div className="modal-footer">
-        <button type="button" className="btn btn-primary" onClick={onClose}>
+        <button className="btn btn-primary" onClick={onClose}>
           Cancel
         </button>
-        <button type="button" className="btn btn-primary" onClick={submit}>
+        <button className="btn btn-primary" onClick={submit}>
           Create
         </button>
       </div>

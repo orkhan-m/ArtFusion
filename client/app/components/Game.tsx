@@ -12,7 +12,7 @@ import { NFTCard } from "./NFTCard";
 import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
-import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../../common";
+import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../common";
 import { OwnedNft } from "alchemy-sdk";
 import {
   accountType,
@@ -20,7 +20,12 @@ import {
   gasManagerConfig,
   accountClientOptions as opts,
 } from "@/config";
-import { useSmartAccountClient, useUser } from "@alchemy/aa-alchemy/react";
+import {
+  useSendUserOperation,
+  useSmartAccountClient,
+  useUser,
+} from "@alchemy/aa-alchemy/react";
+import { OpStatus } from "./op-status";
 import { encodeFunctionData, Hex } from "viem";
 
 export const Game: React.FC = () => {
@@ -32,6 +37,12 @@ export const Game: React.FC = () => {
     gasManagerConfig,
     opts,
   });
+  const {
+    sendUserOperation,
+    sendUserOperationResult,
+    isSendingUserOperation,
+    error: isSendUserOperationError,
+  } = useSendUserOperation({ client, waitForTxn: true });
   const user = useUser();
 
   const [wallet, setWalletAddress] = useState<string>("");
@@ -136,51 +147,25 @@ export const Game: React.FC = () => {
     },
   });
 
-  const test = async () => {
-    const tokenUri = "ipfs://QmUYxc1mWMDtc2PLbr9rd1GxVTJheU288LAxR6dQko2W3W";
-
-    const uoCallData = encodeFunctionData({
-      abi: CONTRACT_ABI,
-      functionName: "mintNFT",
-      args: [tokenUri, wallet],
-    });
-
-    const uo = await client!.sendUserOperation({
-      uo: {
-        // NOTE: targeting user's wallet address
-        // target: wallet as Hex,
-        target: DEFAULT_CONTRACT_ADDRESS as Hex,
-        data: uoCallData,
-      },
-    });
-
-    const txHash = await client!.waitForUserOperationTransaction(uo);
-    console.log(txHash);
-  };
-
   return (
     <div>
       <div className="address-wrapper">
-        <div>
-          <label>Your wallet address:</label>
-          <input type="text" value={wallet} readOnly></input>
+        <div className="address">
+          <div>Your wallet address:</div>
+          <div>{wallet}</div>
         </div>
-        <div>
-          <label>Collection address:</label>
-          <input type="text" value={collection} readOnly></input>
+        <div className="address">
+          <div>Collection address:</div>
+          <div>{collection}</div>
         </div>
       </div>
-      <div className="mt-4">
+      <div className="mt-6">
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="dnd-wrapper">
             <div className="dnd-item">
               <div className="dnd-item-header">
                 <h5>Your Collection</h5>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={test}
-                >
+                <button className="btn btn-primary" onClick={openModal}>
                   Create new NFT
                 </button>
               </div>
@@ -219,7 +204,6 @@ export const Game: React.FC = () => {
               <div className="dnd-item-header">
                 <h5>Mixer area (drop here your nfts to combine them)</h5>
                 <button
-                  type="button"
                   className="btn btn-primary"
                   onClick={() => {
                     generateImage();
@@ -261,7 +245,11 @@ export const Game: React.FC = () => {
           </div>
         </DragDropContext>
       </div>
-      <div id="alchemy-signer-iframe-container"></div>
+      <OpStatus
+        sendUserOperationResult={sendUserOperationResult}
+        isSendingUserOperation={isSendingUserOperation}
+        isSendUserOperationError={isSendUserOperationError}
+      />
       <CreateNFTModal isOpen={isCreateNFTModalOpen} onClose={closeModal} />
     </div>
   );

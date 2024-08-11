@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 
 const TypingEffect = ({ text = "", speed = 50 }) => {

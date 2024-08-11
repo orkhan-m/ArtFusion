@@ -10,9 +10,10 @@ import { QueryClient } from "@tanstack/react-query";
 import { ALCHEMY_ACCOUNTS_API_KEY, ALCHEMY_GAS_POLICY_ID } from "./app/consts";
 import { Network, Alchemy } from "alchemy-sdk";
 
+export const chain = sepolia;
 export const config = createConfig({
   apiKey: ALCHEMY_ACCOUNTS_API_KEY,
-  chain: sepolia,
+  chain,
   ssr: true,
   storage: cookieStorage,
 });
