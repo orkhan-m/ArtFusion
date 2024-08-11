@@ -8,7 +8,7 @@ import axios, { AxiosResponse } from "axios";
 import TypingEffect from "../utils";
 import { ChatCompletion } from "../models";
 import { encodeFunctionData, Hex } from "viem";
-import { CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
+import { BACKEND_URL, CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import {
   useSendUserOperation,
   useSmartAccountClient,
@@ -71,7 +71,7 @@ export const CreateNFTModal: React.FC<IProps> = ({
   const sendImage = async (file: ImageType) => {
     return axios
       .post<ImageType, AxiosResponse<ChatCompletion>>(
-        "http://localhost:4000/chat-gpt/analyzeImage",
+        BACKEND_URL + "/chat-gpt/analyzeImage",
         {
           data_url: file.data_url,
         }
@@ -82,7 +82,7 @@ export const CreateNFTModal: React.FC<IProps> = ({
   const createNFTMetadataRequest = async (data: CreateNFTMetadataRequest) => {
     return axios
       .post<CreateNFTMetadataRequest, AxiosResponse<CreateNFTMetadataResponse>>(
-        "http://localhost:4000/createNFTMetadata",
+        BACKEND_URL + "/createNFTMetadata",
         data
       )
       .then((response) => response.data);

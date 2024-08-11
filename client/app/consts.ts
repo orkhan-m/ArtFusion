@@ -6,6 +6,10 @@ export const ALCHEMY_ACCOUNTS_API_KEY = "UMdZ32ZCIxBApSzLVHlE3XTfKz3E83rR";
 export const ALCHEMY_ACCESS_KEY = "alcht_sjAbNa3XatFkZTsgEkVbJ7thpOCTlA";
 export const ALCHEMY_GAS_POLICY_ID = "d4bac073-0a76-48a2-8e1e-c39c190a8f7f";
 
+export const BACKEND_URL =
+  "https://unwilling-fannie-artfusion-41c83dad.koyeb.app";
+// export const BACKEND_URL = 'http://localhost:4000'
+
 export const CONTRACT_ABI = [
   {
     inputs: [],

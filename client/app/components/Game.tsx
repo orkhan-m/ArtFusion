@@ -7,7 +7,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
+import { BACKEND_URL, CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { CreateNFTMetadataResponse, CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
@@ -121,7 +121,7 @@ export const Game: React.FC = () => {
     setIsShaking(true);
     return axios
       .post<NFTBaseData[], AxiosResponse<CreateNFTMetadataResponse>>(
-        "http://localhost:4000/shakeNFTs",
+        BACKEND_URL + "/shakeNFTs",
         data
       )
       .then((response) => response.data);
