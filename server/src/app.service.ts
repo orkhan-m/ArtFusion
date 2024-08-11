@@ -4,6 +4,8 @@ import axios from 'axios';
 import OpenAI from 'openai';
 import { NFTBaseData } from 'src/models';
 import { PinataSDK } from 'pinata';
+import { CreateNFTMetadataRequest } from './app.controller';
+import { v4 as uuidv4 } from 'uuid';
 
 const openai = new OpenAI();
 
@@ -49,7 +51,10 @@ export class AppService {
         {
           role: 'user',
           content: [
-            { type: 'text', text: 'What’s in this image?' },
+            {
+              type: 'text',
+              text: 'Write me what item is on the image. You answer should containt two sentence. First, the name of the image (max 20 char.). Second, the description (max 100 char.). There should not be anything else in answer. Only these two sentence. No fields name. Sentences should be separated by dot, not other sign.',
+            },
             {
               type: 'image_url',
               image_url: {
@@ -88,6 +93,30 @@ export class AppService {
       const upload = await this.pinata.upload.url(generateImageUrl);
       console.log(upload);
       return upload;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async createNFTMetadata(data: CreateNFTMetadataRequest) {
+    try {
+      const id = uuidv4();
+      const uploadImageResponse = await this.pinata.upload.base64(
+        data.imageUrl.split(',')[1],
+        {
+          metadata: { name: `${id}_${data.name}` },
+        },
+      );
+      const json = JSON.stringify({
+        name: data.name,
+        description: data.description,
+        image: `${this.pinata.config.pinataGateway}/ipfs/${uploadImageResponse.IpfsHash}`,
+      });
+      const file = new File([json], `${id}.json`, {
+        type: 'application/json',
+      });
+      const uploadJsonResponse = await this.pinata.upload.file(file);
+      return uploadJsonResponse;
     } catch (error) {
       console.log(error);
     }

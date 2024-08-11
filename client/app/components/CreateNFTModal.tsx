@@ -26,6 +26,16 @@ const customStyles = {
   },
 };
 
+export interface CreateNFTMetadataRequest {
+  name: string;
+  description: string;
+  imageUrl: string;
+}
+
+export interface CreateNFTMetadataResponse {
+  IpfsHash: string;
+}
+
 interface IProps {
   isOpen: boolean;
   onClose: () => void;
@@ -63,6 +73,25 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
       .then((response) => response.data);
   };
 
+  const createNFTMetadataRequest = async (data: CreateNFTMetadataRequest) => {
+    return axios
+      .post<CreateNFTMetadataRequest, AxiosResponse<CreateNFTMetadataResponse>>(
+        "http://localhost:4000/createNFTMetadata",
+        data
+      )
+      .then((response) => response.data);
+  };
+
+  const { isPending: isCreateNFTMetadataLoading, mutate: createNFTMetadata } =
+    useMutation({
+      mutationFn: (data: CreateNFTMetadataRequest) => {
+        return createNFTMetadataRequest(data);
+      },
+      onSuccess: (data) => {
+        createNFT(data);
+      },
+    });
+
   const { isPending: isAnalyzeImageLoading, mutate: analyzeImage } =
     useMutation({
       mutationFn: (file: ImageType) => {
@@ -73,25 +102,39 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
       },
     });
 
-  const test = async () => {
-    console.log("test");
-    const tokenUri = "ipfs://QmUYxc1mWMDtc2PLbr9rd1GxVTJheU288LAxR6dQko2W3W";
+  const createNFT = async (data: CreateNFTMetadataResponse) => {
     const uoCallData = encodeFunctionData({
       abi: CONTRACT_ABI,
       functionName: "mintNFT",
-      args: [tokenUri, user?.address],
+      args: [data.IpfsHash, user?.address],
     });
     sendUserOperation({
       uo: {
-        // NOTE: targeting user's wallet address
-        // target: wallet as Hex,
         target: DEFAULT_CONTRACT_ADDRESS as Hex,
         data: uoCallData,
       },
     });
   };
 
-  const removeImage = (index: number) => {};
+  const closeModal = () => {
+    setImages([]);
+    setAiResponse(null);
+    onClose();
+  };
+
+  const handleCreateNFTMetadata = () => {
+    if (aiResponse) {
+      const fields = aiResponse.choices[0].message.content
+        .split(".")
+        .map((i) => i.trim());
+      const data: CreateNFTMetadataRequest = {
+        name: fields[0],
+        description: fields[1],
+        imageUrl: images[0].data_url,
+      };
+      createNFTMetadata(data);
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} style={customStyles}>
@@ -143,6 +186,7 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
             )}
           </ImageUploading>
           {isAnalyzeImageLoading && <div>Our AI analyzing your image...</div>}
+
           {aiResponse && !isAnalyzeImageLoading && (
             <div className="chat-simulation">
               <TypingEffect
@@ -151,12 +195,15 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
               />
             </div>
           )}
+          {(isCreateNFTMetadataLoading || isSendingUserOperation) && (
+            <div>We create and NFT for you...</div>
+          )}
         </div>
       </div>
       <div className="modal-footer">
         <button
           className="btn btn-primary"
-          onClick={onClose}
+          onClick={closeModal}
           disabled={isAnalyzeImageLoading}
         >
           Cancel
@@ -175,7 +222,7 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
         {aiResponse && (
           <button
             className="btn btn-primary"
-            onClick={submit}
+            onClick={handleCreateNFTMetadata}
             disabled={isAnalyzeImageLoading}
           >
             Create
