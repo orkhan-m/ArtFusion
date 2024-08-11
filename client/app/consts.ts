@@ -11,11 +11,9 @@ export const ALCHEMY_GAS_POLICY_ID = "0f0bd52c-de65-4c23-b712-2f07d0f3515f";
 export const GENERATE_IMAGE_MOCK_INPUT: NFTBaseData[] = [
   {
     name: "Vintage Typewriter",
-    description: "A classic typewriter with a mechanical keyboard",
   },
   {
     name: "Drone",
-    description: "A high-tech drone with a camera for aerial photography",
   },
 ];
 
