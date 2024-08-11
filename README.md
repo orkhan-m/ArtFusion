@@ -38,7 +38,7 @@ This application allows users to create, manage, and merge NFTs using AI, all wi
 ## How It Works
 
 1. **Login:** Users log in with their email using Alchemy Account Kit.
-2. **Create an NFT:** Upload an image. The AI processes the image, generates a description, and creates an NFT.
+2. **Create an NFT:** Upload an image. The AI processes the image, generates a description, and creates an NFT. Two NFTs used as a source for new one are burned.
 3. **Merge NFTs:** Select two NFTs to combine. The AI merges them to create a new, unique NFT.
 4. **Storage:** The newly created or merged NFT image is stored on IPFS, ensuring decentralized, secure, and reliable access.
 
