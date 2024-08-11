@@ -138,15 +138,12 @@ export const Game: React.FC = () => {
 
   const test = async () => {
     const tokenUri = "ipfs://QmUYxc1mWMDtc2PLbr9rd1GxVTJheU288LAxR6dQko2W3W";
-    console.log("Token URI:", tokenUri);
 
     const uoCallData = encodeFunctionData({
       abi: CONTRACT_ABI,
       functionName: "mintNFT",
       args: [tokenUri, wallet],
     });
-
-    console.log("uoCallData:", uoCallData);
 
     const uo = await client!.sendUserOperation({
       uo: {

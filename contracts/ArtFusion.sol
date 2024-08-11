@@ -31,23 +31,24 @@ contract ArtFusion is ERC721Enumerable {
     // tokenIds - array with all the tokens of the user
     function burnAndMintNew(
         uint256[] memory tokenIds,
-        string memory newTokenUri
+        string memory newTokenUri,
+        address recepient
     ) public {
         require(tokenIds.length == 2, "Must burn two NFTs");
 
         // Check ownership and burn each NFT
         for (uint256 i = 0; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
-            require(
-                ownerOf(tokenId) == msg.sender,
-                "You do not own this token"
-            );
+            // require(
+            //     ownerOf(tokenId) == msg.sender,
+            //     "You do not own this token"
+            // );
             _burn(tokenId);
             delete s_tokenIdToUri[tokenId]; // Remove URI mapping of burned tokens
         }
         // Mint a new NFT with the provided URI
         s_tokenIdToUri[s_tokenCounter] = newTokenUri;
-        _safeMint(msg.sender, s_tokenCounter);
+        _safeMint(recepient, s_tokenCounter);
         s_tokenCounter++;
     }
 }

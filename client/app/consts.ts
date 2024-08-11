@@ -1,5 +1,5 @@
 export const DEFAULT_CONTRACT_ADDRESS =
-  "0x87b20835950639a72cb4f81d8a7e8a0a75995321";
+  "0x491b61d349b9ad4b2b1ac398b9280a079b97192a";
 
 export const ALCHEMY_ACCOUNTS_API_KEY = "K9lNAjXCyoltcpA54QhD0zcxbRMsDAbQ";
 // export const ALCHEMY_ACTIONS_API_KEY = "tFRus-ejJq6yuZyv0jLCrrn2y5eCLsyK";
@@ -259,6 +259,11 @@ export const CONTRACT_ABI = [
         internalType: "string",
         name: "newTokenUri",
         type: "string",
+      },
+      {
+        internalType: "address",
+        name: "recepient",
+        type: "address",
       },
     ],
     name: "burnAndMintNew",

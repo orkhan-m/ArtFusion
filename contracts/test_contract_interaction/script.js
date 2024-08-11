@@ -1,4 +1,4 @@
-const contractAddress = "0x87b20835950639a72cb4f81d8a7e8a0a75995321"; // Replace with your deployed contract address
+const contractAddress = "0x491b61d349b9ad4b2b1ac398b9280a079b97192a"; // Replace with your deployed contract address
 const contractABI = [
   {
     inputs: [],
@@ -252,6 +252,11 @@ const contractABI = [
         internalType: "string",
         name: "newTokenUri",
         type: "string",
+      },
+      {
+        internalType: "address",
+        name: "recepient",
+        type: "address",
       },
     ],
     name: "burnAndMintNew",
@@ -717,9 +722,17 @@ document
     const burnTokenId1 = document.getElementById("burnTokenId1").value;
     const burnTokenId2 = document.getElementById("burnTokenId2").value;
     const newTokenUri = document.getElementById("newTokenUriInput").value;
+    const recipientInput = document.getElementById("recipientInput").value; // New recipient input field
 
-    if (!burnTokenId1 || !burnTokenId2 || !newTokenUri) {
-      alert("Please enter two valid token IDs and a new token URI");
+    if (
+      !burnTokenId1 ||
+      !burnTokenId2 ||
+      !newTokenUri ||
+      !web3.utils.isAddress(recipientInput)
+    ) {
+      alert(
+        "Please enter two valid token IDs, a new token URI, and a valid recipient address"
+      );
       return;
     }
 
@@ -729,7 +742,11 @@ document
 
       // Call the burnAndMintNew function from the smart contract
       await contract.methods
-        .burnAndMintNew([burnTokenId1, burnTokenId2], newTokenUri)
+        .burnAndMintNew(
+          [burnTokenId1, burnTokenId2],
+          newTokenUri,
+          recipientInput
+        )
         .send({ from: account });
 
       alert("Two NFTs burned and a new one minted successfully!");
