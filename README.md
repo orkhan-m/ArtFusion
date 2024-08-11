@@ -1,5 +1,5 @@
 # ArtFusion
-# AI-Powered NFT Creation App
+## AI-Powered NFT Creation App
 
 ## Overview
 
