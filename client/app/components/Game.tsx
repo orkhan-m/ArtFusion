@@ -177,6 +177,10 @@ export const Game: React.FC = () => {
           <div>{collection}</div>
         </div>
       </div>
+      <div className="mt-3">
+        <div>Create new NFTs or combine existing ones using Web3-AI mixer</div>
+        <div>We support mixing of two NFTs for the moment</div>
+      </div>
       {isNftsLoading ? (
         <div className="mt-6">NFTs loading...</div>
       ) : (
