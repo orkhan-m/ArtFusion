@@ -155,13 +155,10 @@ export const Game: React.FC = () => {
   useEffect(() => {
     if (sendUserOperationResult || isSendUserOperationError) {
       setIsShaking(false);
+      setDroppedCards([]);
+      fetchNFTs();
     }
-    console.log("sendUserOperationResult", sendUserOperationResult);
   }, [sendUserOperationResult, isSendUserOperationError]);
-
-  useEffect(() => {
-    console.log("isSendUserOperationError", isSendUserOperationError);
-  }, [isSendUserOperationError]);
 
   return (
     <div>
