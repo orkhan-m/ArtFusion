@@ -43,3 +43,118 @@ This application allows users to create, manage, and merge NFTs using AI, all wi
 4. **Storage:** The newly created or merged NFT image is stored on IPFS, ensuring decentralized, secure, and reliable access.
 
 ## Installation
+## Installation
+
+The deployed app will function without needing your OpenAI API Key. However, for running the app locally, you will need to add your OpenAI API Key to your environment variables.
+
+### For bash users:
+
+1. Open your bash profile in a text editor:
+
+    ```bash
+    nano ~/.bash_profile
+    ```
+
+2. Add the following line to the file:
+
+    ```bash
+    export OPENAI_API_KEY="YOUR_API_KEY"
+    ```
+
+3. Save the file and apply the changes by running:
+
+    ```bash
+    source ~/.bash_profile
+    ```
+
+4. To verify that the key has been added correctly, run:
+
+    ```bash
+    echo $OPENAI_API_KEY
+    ```
+
+   If everything is set up correctly, this command should display your API key.
+
+### For zsh users:
+
+1. Open your zsh profile in a text editor:
+
+    ```bash
+    nano ~/.zshrc
+    ```
+
+2. Add the following line to the file:
+
+    ```bash
+    export OPENAI_API_KEY="YOUR_API_KEY"
+    ```
+
+3. Save the file and apply the changes by running:
+
+    ```bash
+    source ~/.zshrc
+    ```
+
+4. To verify that the key has been added correctly, run:
+
+    ```bash
+    echo $OPENAI_API_KEY
+    ```
+
+   If everything is set up correctly, this command should display your API key.
+
+## Running the Application
+
+### Running the Server
+
+1. Navigate to the server directory:
+
+    ```bash
+    cd server
+    ```
+
+2. Install the dependencies using `npm`:
+
+    ```bash
+    npm i
+    ```
+
+3. Start the server in development mode:
+
+    ```bash
+    npm run start:dev
+    ```
+
+   Alternatively, if you prefer using `yarn`:
+
+   ```bash
+   yarn install
+   yarn start:dev
+   ```
+
+### Running the Client
+
+1. Navigate to the client directory:
+
+    ```bash
+    cd client
+    ```
+
+2. Install the dependencies using `yarn`:
+
+    ```bash
+    yarn
+    ```
+
+3. Start the server in development mode:
+
+    ```bash
+    yarn dev
+    ```
+
+   Alternatively, if you prefer using `npm`:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
