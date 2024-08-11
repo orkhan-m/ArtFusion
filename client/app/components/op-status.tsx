@@ -1,5 +1,4 @@
 import { LoadingSpinner } from "./loading-spinner";
-import { chain } from "@/config";
 
 export const OpStatus = ({
   sendUserOperationResult,
@@ -18,18 +17,18 @@ export const OpStatus = ({
     return <LoadingSpinner />;
   }
 
-  if (sendUserOperationResult) {
-    return (
-      <a
-        href={`${chain.blockExplorers?.default.url}/tx/${sendUserOperationResult.hash}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-center text-[#363FF9] hover:underline dark:text-white"
-      >
-        View transaction details
-      </a>
-    );
-  }
+  // if (sendUserOperationResult) {
+  //   return (
+  //     <a
+  //       href={`${chain.blockExplorers?.default.url}/tx/${sendUserOperationResult.hash}`}
+  //       target="_blank"
+  //       rel="noopener noreferrer"
+  //       className="text-center text-[#363FF9] hover:underline dark:text-white"
+  //     >
+  //       View transaction details
+  //     </a>
+  //   );
+  // }
 
   return <div className="invisible">placeholder</div>;
 };
