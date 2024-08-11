@@ -1,23 +1,10 @@
-import { NFTBaseData } from "./models";
-
 export const DEFAULT_CONTRACT_ADDRESS =
   "0x491b61d349b9ad4b2b1ac398b9280a079b97192a";
 
-export const ALCHEMY_ACCOUNTS_API_KEY = "K9lNAjXCyoltcpA54QhD0zcxbRMsDAbQ";
+export const ALCHEMY_ACCOUNTS_API_KEY = "UMdZ32ZCIxBApSzLVHlE3XTfKz3E83rR";
 // export const ALCHEMY_ACTIONS_API_KEY = "tFRus-ejJq6yuZyv0jLCrrn2y5eCLsyK";
 export const ALCHEMY_ACCESS_KEY = "alcht_sjAbNa3XatFkZTsgEkVbJ7thpOCTlA";
-export const ALCHEMY_GAS_POLICY_ID = "0f0bd52c-de65-4c23-b712-2f07d0f3515f";
-
-export const GENERATE_IMAGE_MOCK_INPUT: NFTBaseData[] = [
-  {
-    name: "Vintage Typewriter",
-    description: "A classic typewriter with a mechanical keyboard",
-  },
-  {
-    name: "Drone",
-    description: "A high-tech drone with a camera for aerial photography",
-  },
-];
+export const ALCHEMY_GAS_POLICY_ID = "d4bac073-0a76-48a2-8e1e-c39c190a8f7f";
 
 export const CONTRACT_ABI = [
   {

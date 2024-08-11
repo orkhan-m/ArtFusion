@@ -22,13 +22,13 @@ export class AppController {
     return this.appService.analyzeImage(file.data_url);
   }
 
-  @Post('createNFT')
+  @Post('shakeNFTs')
   async generateImage(@Body() data: NFTBaseData[]) {
-    return this.appService.createNFT(data);
+    return this.appService.shakeNFTs(data);
   }
 
   @Post('createNFTMetadata')
   async createNFTMetadata(@Body() data: CreateNFTMetadataRequest) {
-    return this.appService.createNFTMetadata(data);
+    return this.appService.createNFTMetadata(data, 'base64');
   }
 }

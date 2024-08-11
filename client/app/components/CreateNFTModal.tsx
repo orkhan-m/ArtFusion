@@ -2,7 +2,7 @@
 
 import Modal from "react-modal";
 import ImageUploading, { ImageType } from "react-images-uploading";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import TypingEffect from "../utils";
@@ -14,6 +14,7 @@ import {
   useSmartAccountClient,
   useUser,
 } from "@account-kit/react";
+import { enqueueSnackbar } from "notistack";
 
 const customStyles = {
   content: {
@@ -39,9 +40,14 @@ export interface CreateNFTMetadataResponse {
 interface IProps {
   isOpen: boolean;
   onClose: () => void;
+  refetchNfts: () => void;
 }
 
-export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
+export const CreateNFTModal: React.FC<IProps> = ({
+  isOpen,
+  onClose,
+  refetchNfts,
+}) => {
   const [images, setImages] = useState<ImageType[]>([]);
   const user = useUser();
   const { client } = useSmartAccountClient({ type: "LightAccount" });
@@ -136,6 +142,14 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    if (sendUserOperationResult) {
+      enqueueSnackbar("NFT has been created!");
+      refetchNfts();
+      onClose();
+    }
+  }, [sendUserOperationResult]);
+
   return (
     <Modal isOpen={isOpen} style={customStyles}>
       <div className="modal-header">
@@ -150,7 +164,7 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
             onChange={onChange}
             maxNumber={maxNumber}
             dataURLKey="data_url"
-            acceptType={["jpg", "png"]}
+            acceptType={["jpg", "png", "jpeg", "webp"]}
           >
             {({ imageList, onImageUpload, onImageRemove, dragProps }) => (
               // write your building UI
@@ -196,7 +210,9 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
             </div>
           )}
           {(isCreateNFTMetadataLoading || isSendingUserOperation) && (
-            <div>We create and NFT for you...</div>
+            <div className="mt-2">
+              Some Unique NFT is being prepared for you...
+            </div>
           )}
         </div>
       </div>

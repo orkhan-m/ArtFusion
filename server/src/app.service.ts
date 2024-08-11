@@ -53,7 +53,7 @@ export class AppService {
           content: [
             {
               type: 'text',
-              text: 'Write me what item is on the image. You answer should containt two sentence. First, the name of the image (max 20 char.). Second, the description (max 100 char.). There should not be anything else in answer. Only these two sentence. No fields name. Sentences should be separated by dot, not other sign.',
+              text: 'Write me what item is on the image. You answer should containt two sentence. First, the name of the image (max 20 char.). Second, the description (max 100 char.). There should not be anything else in answer. Only these two sentence. No fields name. Sentences should be separated by dot, not other sign. If you doubt a lot on what is on the image just give it some fancy name and description.',
             },
             {
               type: 'image_url',
@@ -68,45 +68,69 @@ export class AppService {
     return response;
   }
 
-  private async generateImage(data: NFTBaseData[]) {
+  private getShakeNFTsPrompt(data: NFTBaseData[]) {
+    const formattedNFTs = data.map((nft, index) => {
+      return `${index + 1}. Name: ${nft.name}.`;
+    });
+    const combination = formattedNFTs.join(' ');
+    return `Please generate a unique image that combines the following items: ${combination}.`;
+  }
+
+  async shakeNFTs(data: NFTBaseData[]) {
+    const shakeNFTsPrompt = this.getShakeNFTsPrompt(data);
+    console.log('shakeNFTsPrompt: ', shakeNFTsPrompt);
     const openaiImage = await openai.images.generate({
       model: 'dall-e-2',
-      prompt: this.combineNFTsTextsToPrompt(data),
+      prompt: shakeNFTsPrompt,
       n: 1,
       size: '256x256',
       response_format: 'url', // url or b64_json
     });
-    return openaiImage.data[0].url;
+    console.log('openaiImage.data[0].url: ', openaiImage.data[0].url);
+    const analyzeImageResponse = await this.analyzeImage(
+      openaiImage.data[0].url,
+    );
+    const content = analyzeImageResponse.choices[0].message.content;
+    console.log('content: ', content);
+    const fields = content.split('.').map((i) => i.trim());
+    const metadata: CreateNFTMetadataRequest = {
+      name: fields[0],
+      description: fields[1],
+      imageUrl: openaiImage.data[0].url,
+    };
+    console.log('metadata: ', metadata);
+    const response = await this.createNFTMetadata(metadata, 'url');
+    return response;
   }
 
   private combineNFTsTextsToPrompt(nftArray: NFTBaseData[]): string {
     const formattedNFTs = nftArray.map((nft, index) => {
-      return `${index + 1}. Name: ${nft.name}. Description: ${nft.description}`;
+      return `${index + 1}. Name: ${nft.name}.`;
     });
     const combination = formattedNFTs.join(' ');
     return `Please generate a unique image that combines the following items. Provide a new name and a brief description (maximum 200 characters) for the generated image. Here is the input data: ${combination}.`;
   }
 
-  async createNFT(data: NFTBaseData[]) {
-    const generateImageUrl = await this.generateImage(data);
-    try {
-      const upload = await this.pinata.upload.url(generateImageUrl);
-      console.log(upload);
-      return upload;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async createNFTMetadata(data: CreateNFTMetadataRequest) {
+  async createNFTMetadata(
+    data: CreateNFTMetadataRequest,
+    type: 'url' | 'base64',
+  ) {
     try {
       const id = uuidv4();
-      const uploadImageResponse = await this.pinata.upload.base64(
-        data.imageUrl.split(',')[1],
-        {
+      let uploadImageResponse;
+      if (type === 'url') {
+        uploadImageResponse = await this.pinata.upload.url(data.imageUrl, {
           metadata: { name: `${id}_${data.name}` },
-        },
-      );
+        });
+      } else if (type === 'base64') {
+        uploadImageResponse = await this.pinata.upload.base64(
+          data.imageUrl.split(',')[1],
+          {
+            metadata: { name: `${id}_${data.name}` },
+          },
+        );
+      }
+
       const json = JSON.stringify({
         name: data.name,
         description: data.description,

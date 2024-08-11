@@ -7,13 +7,12 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { DEFAULT_CONTRACT_ADDRESS, GENERATE_IMAGE_MOCK_INPUT } from "../consts";
+import { CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
 import { NFTCard } from "./NFTCard";
-import { CreateNFTModal } from "./CreateNFTModal";
+import { CreateNFTMetadataResponse, CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { OwnedNft } from "alchemy-sdk";
-import { OpStatus } from "./op-status";
 import { alchemyClient } from "@/config";
 import { NFTBaseData } from "../models";
 import {
@@ -21,9 +20,12 @@ import {
   useSmartAccountClient,
   useUser,
 } from "@account-kit/react";
+import classNames from "classnames";
+import { encodeFunctionData, Hex } from "viem";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
+  const [isNftsLoading, setIsNftsLoading] = useState<boolean>(false);
   const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
   // NOTE: initialize smart account client
   const { client } = useSmartAccountClient({ type: "LightAccount" });
@@ -38,6 +40,7 @@ export const Game: React.FC = () => {
   const [wallet, setWalletAddress] = useState<string>("");
   const [collection, setCollectionAddress] = useState<string>("");
   const [isCreateNFTModalOpen, setIsCreateNFTModalOpen] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -84,9 +87,12 @@ export const Game: React.FC = () => {
   };
 
   const fetchNFTs = async () => {
+    setIsNftsLoading(true);
     const response = await alchemyClient.nft.getNftsForOwner(user?.address!, {
       contractAddresses: [DEFAULT_CONTRACT_ADDRESS],
     });
+    setIsNftsLoading(false);
+
     setNfts(response.ownedNfts);
   };
 
@@ -111,31 +117,51 @@ export const Game: React.FC = () => {
     setIsCreateNFTModalOpen(false);
   };
 
-  const sendNFTData = async () => {
-    const data: NFTBaseData[] = droppedCards.map((i) => ({
-      name: i.name!,
-      description: i.description!,
-    }));
+  const shakeNFTsRequest = async (data: NFTBaseData[]) => {
+    setIsShaking(true);
     return axios
-      .post<NFTBaseData[], AxiosResponse<any>>(
-        "http://localhost:4000/createNFT",
-        GENERATE_IMAGE_MOCK_INPUT
+      .post<NFTBaseData[], AxiosResponse<CreateNFTMetadataResponse>>(
+        "http://localhost:4000/shakeNFTs",
+        data
       )
       .then((response) => response.data);
   };
 
-  const {
-    isPending: isGenerateImageLoading,
-    mutate: generateImage,
-    data: generateImageData,
-  } = useMutation({
-    mutationFn: () => {
-      return sendNFTData();
+  const burnAndMintNew = async (tokenUri: string) => {
+    const tokenIds = droppedCards.map((i) => i.tokenId);
+    console.log(tokenIds);
+    const uoCallData = encodeFunctionData({
+      abi: CONTRACT_ABI,
+      functionName: "burnAndMintNew",
+      args: [tokenIds, tokenUri, user?.address],
+    });
+    sendUserOperation({
+      uo: {
+        target: DEFAULT_CONTRACT_ADDRESS as Hex,
+        data: uoCallData,
+      },
+    });
+  };
+
+  const { isPending: isShakeNFTsLoading, mutate: shakeNFTs } = useMutation({
+    mutationFn: (data: NFTBaseData[]) => {
+      return shakeNFTsRequest(data);
     },
     onSuccess: (data) => {
-      console.log(data);
+      burnAndMintNew(data.IpfsHash);
     },
   });
+
+  useEffect(() => {
+    if (sendUserOperationResult || isSendUserOperationError) {
+      setIsShaking(false);
+    }
+    console.log("sendUserOperationResult", sendUserOperationResult);
+  }, [sendUserOperationResult, isSendUserOperationError]);
+
+  useEffect(() => {
+    console.log("isSendUserOperationError", isSendUserOperationError);
+  }, [isSendUserOperationError]);
 
   return (
     <div>
@@ -149,98 +175,108 @@ export const Game: React.FC = () => {
           <div>{collection}</div>
         </div>
       </div>
-      <div className="mt-6">
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="dnd-wrapper">
-            <div className="dnd-item">
-              <div className="dnd-item-header">
-                <h5>Your Collection</h5>
-                <button className="btn btn-primary" onClick={openModal}>
-                  Create new NFT
-                </button>
+      {isNftsLoading ? (
+        <div className="mt-6">NFTs loading...</div>
+      ) : (
+        <div className="mt-6">
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div className="dnd-wrapper">
+              <div className="dnd-item">
+                <div className="dnd-item-header">
+                  <h5>Your Collection</h5>
+                  <button className="btn btn-primary" onClick={openModal}>
+                    Create new NFT
+                  </button>
+                  {isShaking && <div>We are combining your NFTs!</div>}
+                </div>
+
+                <Droppable droppableId="cards" direction="horizontal">
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="card-list"
+                    >
+                      {nfts.map((nft, index) => (
+                        <Draggable
+                          key={nft.tokenId}
+                          draggableId={nft.tokenId}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <NFTCard nft={nft}></NFTCard>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </div>
 
-              <Droppable droppableId="cards" direction="horizontal">
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="card-list"
+              <div className="dnd-item">
+                <div className="dnd-item-header">
+                  <h5>Mixer area (drop here your nfts to combine them)</h5>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      const data: NFTBaseData[] = droppedCards.map((i) => ({
+                        name: i.name!,
+                      }));
+                      shakeNFTs(data);
+                    }}
                   >
-                    {nfts.map((nft, index) => (
-                      <Draggable
-                        key={nft.tokenId}
-                        draggableId={nft.tokenId}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <NFTCard nft={nft}></NFTCard>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </div>
+                    Shake them!
+                  </button>
+                </div>
 
-            <div className="dnd-item">
-              <div className="dnd-item-header">
-                <h5>Mixer area (drop here your nfts to combine them)</h5>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    generateImage();
-                  }}
-                >
-                  Shake them!
-                </button>
+                <Droppable droppableId="dropArea" direction="horizontal">
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={classNames("drop-area", { shake: isShaking })}
+                    >
+                      {droppedCards.map((nft, index) => (
+                        <Draggable
+                          key={nft.tokenId}
+                          draggableId={nft.tokenId}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <NFTCard nft={nft}></NFTCard>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </div>
-
-              <Droppable droppableId="dropArea" direction="horizontal">
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="drop-area"
-                  >
-                    {droppedCards.map((nft, index) => (
-                      <Draggable
-                        key={nft.tokenId}
-                        draggableId={nft.tokenId}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <NFTCard nft={nft}></NFTCard>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
             </div>
-          </div>
-        </DragDropContext>
-      </div>
-      <OpStatus
-        sendUserOperationResult={sendUserOperationResult}
-        isSendingUserOperation={isSendingUserOperation}
-        isSendUserOperationError={isSendUserOperationError}
-      />
-      <CreateNFTModal isOpen={isCreateNFTModalOpen} onClose={closeModal} />
+          </DragDropContext>
+        </div>
+      )}
+
+      {isCreateNFTModalOpen && (
+        <CreateNFTModal
+          isOpen={isCreateNFTModalOpen}
+          onClose={closeModal}
+          refetchNfts={fetchNFTs}
+        />
+      )}
     </div>
   );
 };
