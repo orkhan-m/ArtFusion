@@ -13,12 +13,7 @@ import {
   useSendUserOperation,
   useSmartAccountClient,
   useUser,
-} from "@alchemy/aa-alchemy/react";
-import {
-  accountType,
-  gasManagerConfig,
-  accountClientOptions as opts,
-} from "@/config";
+} from "@account-kit/react";
 
 const customStyles = {
   content: {
@@ -39,17 +34,14 @@ interface IProps {
 export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
   const [images, setImages] = useState<ImageType[]>([]);
   const user = useUser();
-  const { client } = useSmartAccountClient({
-    type: accountType,
-    gasManagerConfig,
-    opts,
-  });
+  const { client } = useSmartAccountClient({ type: "LightAccount" });
   const {
     sendUserOperation,
     sendUserOperationResult,
     isSendingUserOperation,
     error: isSendUserOperationError,
   } = useSendUserOperation({ client, waitForTxn: true });
+  const [aiResponse, setAiResponse] = useState<ChatCompletion | null>(null);
 
   const maxNumber = 1;
   const onChange = (images: any) => {
@@ -71,18 +63,15 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
       .then((response) => response.data);
   };
 
-  const {
-    isPending: isAnalyzeImageLoading,
-    mutate: analyzeImage,
-    data: chatGptResponse,
-  } = useMutation({
-    mutationFn: (file: ImageType) => {
-      return sendImage(file);
-    },
-    onSuccess: (data) => {
-      console.log(data);
-    },
-  });
+  const { isPending: isAnalyzeImageLoading, mutate: analyzeImage } =
+    useMutation({
+      mutationFn: (file: ImageType) => {
+        return sendImage(file);
+      },
+      onSuccess: (data) => {
+        setAiResponse(data);
+      },
+    });
 
   const test = async () => {
     console.log("test");
@@ -101,6 +90,8 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
       },
     });
   };
+
+  const removeImage = (index: number) => {};
 
   return (
     <Modal isOpen={isOpen} style={customStyles}>
@@ -137,7 +128,12 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
                       alt={image.dataURL}
                     />
                     <div className="image-item__btn-wrapper">
-                      <button onClick={() => onImageRemove(index)}>
+                      <button
+                        onClick={() => {
+                          setAiResponse(null);
+                          onImageRemove(index);
+                        }}
+                      >
                         Remove
                       </button>
                     </div>
@@ -147,10 +143,10 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
             )}
           </ImageUploading>
           {isAnalyzeImageLoading && <div>Our AI analyzing your image...</div>}
-          {chatGptResponse && !isAnalyzeImageLoading && (
+          {aiResponse && !isAnalyzeImageLoading && (
             <div className="chat-simulation">
               <TypingEffect
-                text={chatGptResponse?.choices[0].message.content}
+                text={aiResponse.choices[0].message.content}
                 speed={50}
               />
             </div>
@@ -158,12 +154,33 @@ export const CreateNFTModal: React.FC<IProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
       <div className="modal-footer">
-        <button className="btn btn-primary" onClick={onClose}>
+        <button
+          className="btn btn-primary"
+          onClick={onClose}
+          disabled={isAnalyzeImageLoading}
+        >
           Cancel
         </button>
-        <button className="btn btn-primary" onClick={submit}>
-          Create
-        </button>
+        {images.length && !aiResponse ? (
+          <button
+            className="btn btn-primary"
+            onClick={submit}
+            disabled={isAnalyzeImageLoading}
+          >
+            Analyze
+          </button>
+        ) : (
+          <></>
+        )}
+        {aiResponse && (
+          <button
+            className="btn btn-primary"
+            onClick={submit}
+            disabled={isAnalyzeImageLoading}
+          >
+            Create
+          </button>
+        )}
       </div>
     </Modal>
   );

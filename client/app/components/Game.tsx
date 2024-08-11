@@ -7,36 +7,26 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { CONTRACT_ABI, DEFAULT_CONTRACT_ADDRESS } from "../consts";
+import { DEFAULT_CONTRACT_ADDRESS, GENERATE_IMAGE_MOCK_INPUT } from "../consts";
 import { NFTCard } from "./NFTCard";
 import { CreateNFTModal } from "./CreateNFTModal";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
-import { NFTBaseData, GENERATE_IMAGE_MOCK_INPUT } from "../../common";
 import { OwnedNft } from "alchemy-sdk";
-import {
-  accountType,
-  alchemyClient,
-  gasManagerConfig,
-  accountClientOptions as opts,
-} from "@/config";
+import { OpStatus } from "./op-status";
+import { alchemyClient } from "@/config";
+import { NFTBaseData } from "../models";
 import {
   useSendUserOperation,
   useSmartAccountClient,
   useUser,
-} from "@alchemy/aa-alchemy/react";
-import { OpStatus } from "./op-status";
-import { encodeFunctionData, Hex } from "viem";
+} from "@account-kit/react";
 
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
   // NOTE: initialize smart account client
-  const { client } = useSmartAccountClient({
-    type: accountType,
-    gasManagerConfig,
-    opts,
-  });
+  const { client } = useSmartAccountClient({ type: "LightAccount" });
   const {
     sendUserOperation,
     sendUserOperationResult,

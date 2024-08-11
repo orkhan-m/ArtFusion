@@ -26,3 +26,8 @@ interface Usage {
   completion_tokens: number;
   total_tokens: number;
 }
+
+export interface NFTBaseData {
+  name: string;
+  description: string;
+}

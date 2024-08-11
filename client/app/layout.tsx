@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import { cookieToInitialState } from "@alchemy/aa-alchemy/config";
+import { cookieToInitialState } from "@account-kit/core";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
@@ -18,6 +18,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // This will allow us to persist state across page boundaries (read more here: https://accountkit.alchemy.com/react/ssr#persisting-the-account-state)
   const initialState = cookieToInitialState(
     config,
     headers().get("cookie") ?? undefined
@@ -25,7 +26,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className} suppressHydrationWarning={true}>
+      <body className={inter.className}>
         <Providers initialState={initialState}>{children}</Providers>
       </body>
     </html>
