@@ -15,9 +15,9 @@ contract ArtFusion is ERC721Enumerable {
     }
 
     // mint NFT
-    function mintNFT(string memory tokenUri) public {
+    function mintNFT(string memory tokenUri, address recipient) public {
         s_tokenIdToUri[s_tokenCounter] = tokenUri;
-        _safeMint(msg.sender, s_tokenCounter);
+        _safeMint(recipient, s_tokenCounter);
         s_tokenCounter++;
     }
 

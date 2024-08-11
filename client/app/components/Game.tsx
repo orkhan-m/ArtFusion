@@ -26,6 +26,7 @@ import { encodeFunctionData, Hex } from "viem";
 export const Game: React.FC = () => {
   const [nfts, setNfts] = useState<OwnedNft[]>([]);
   const [droppedCards, setDroppedCards] = useState<OwnedNft[]>([]);
+  // NOTE: initialize smart account client
   const { client } = useSmartAccountClient({
     type: accountType,
     gasManagerConfig,
@@ -89,7 +90,9 @@ export const Game: React.FC = () => {
   };
 
   useEffect(() => {
+    // NOTE: user's address is correct
     setWalletAddress(user?.address!);
+    // NOTE: contract address is correct
     setCollectionAddress(DEFAULT_CONTRACT_ADDRESS);
   }, [user?.address]);
 
@@ -113,10 +116,10 @@ export const Game: React.FC = () => {
       description: i.description!,
     }));
     return axios
-      .post<
-        NFTBaseData[],
-        AxiosResponse<any>
-      >("http://localhost:4000/createNFT", GENERATE_IMAGE_MOCK_INPUT)
+      .post<NFTBaseData[], AxiosResponse<any>>(
+        "http://localhost:4000/createNFT",
+        GENERATE_IMAGE_MOCK_INPUT
+      )
       .then((response) => response.data);
   };
 
@@ -135,15 +138,21 @@ export const Game: React.FC = () => {
 
   const test = async () => {
     const tokenUri = "ipfs://QmUYxc1mWMDtc2PLbr9rd1GxVTJheU288LAxR6dQko2W3W";
+    console.log("Token URI:", tokenUri);
+
     const uoCallData = encodeFunctionData({
       abi: CONTRACT_ABI,
       functionName: "mintNFT",
-      args: [tokenUri],
+      args: [tokenUri, wallet],
     });
+
+    console.log("uoCallData:", uoCallData);
 
     const uo = await client!.sendUserOperation({
       uo: {
-        target: wallet as Hex,
+        // NOTE: targeting user's wallet address
+        // target: wallet as Hex,
+        target: DEFAULT_CONTRACT_ADDRESS as Hex,
         data: uoCallData,
       },
     });
