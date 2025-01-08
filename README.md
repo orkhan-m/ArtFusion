@@ -1,6 +1,9 @@
 # ArtFusion
 ## AI-Powered NFT Creation App
 
+## Deployed at:
+https://art-fusion-topaz.vercel.app/
+
 ## Overview
 
 This application allows users to create, manage, and merge NFTs using AI, all without requiring any prior experience in cryptocurrency or Web3. Users can log in with their email, upload images, and generate unique NFTs. Additionally, users can combine two NFTs to create a completely new one. The application is built with accessibility and simplicity in mind, making NFT creation available to everyone.
